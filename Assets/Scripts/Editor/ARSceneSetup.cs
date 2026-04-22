@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// One-time menu item to convert MainScene's bare camera into a full AR scene:
@@ -37,30 +40,70 @@ public static class ARSceneSetup
             var xrOriginGO = new GameObject("XR Origin (AR)");
             Undo.RegisterCreatedObjectUndo(xrOriginGO, "Create XR Origin");
             xrOrigin = xrOriginGO.AddComponent<XROrigin>();
+            Debug.Log("[ARSceneSetup] Created XR Origin.");
+        }
 
-            // Camera Offset
+        // Camera Offset
+        var offsetChild = xrOrigin.transform.Find("Camera Offset");
+        if (offsetChild == null)
+        {
             var offsetGO = new GameObject("Camera Offset");
-            offsetGO.transform.SetParent(xrOriginGO.transform, false);
+            Undo.RegisterCreatedObjectUndo(offsetGO, "Create Camera Offset");
+            offsetGO.transform.SetParent(xrOrigin.transform, false);
+            offsetChild = offsetGO.transform;
+        }
+        xrOrigin.CameraFloorOffsetObject = offsetChild.gameObject;
 
-            // AR Camera
+        // AR Camera
+        var camChild = offsetChild.Find("Main Camera");
+        if (camChild == null)
+        {
             var arCameraGO = new GameObject("Main Camera");
+            Undo.RegisterCreatedObjectUndo(arCameraGO, "Create AR Camera");
             arCameraGO.tag = "MainCamera";
-            arCameraGO.transform.SetParent(offsetGO.transform, false);
+            arCameraGO.transform.SetParent(offsetChild, false);
+            camChild = arCameraGO.transform;
+            Debug.Log("[ARSceneSetup] Created AR Camera.");
+        }
 
-            var cam = arCameraGO.AddComponent<Camera>();
+        if (camChild.GetComponent<Camera>() == null)
+        {
+            var cam = camChild.gameObject.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.Color;
             cam.backgroundColor = Color.black;
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 20f;
+        }
 
-            arCameraGO.AddComponent<AudioListener>();
-            arCameraGO.AddComponent<ARCameraManager>();
-            arCameraGO.AddComponent<ARCameraBackground>();
+        // URP requires this on every camera
+        if (camChild.GetComponent<UniversalAdditionalCameraData>() == null)
+            camChild.gameObject.AddComponent<UniversalAdditionalCameraData>();
 
-            xrOrigin.Camera = cam;
-            xrOrigin.CameraFloorOffsetObject = offsetGO;
+        if (camChild.GetComponent<AudioListener>() == null)
+            camChild.gameObject.AddComponent<AudioListener>();
+        if (camChild.GetComponent<ARCameraManager>() == null)
+            camChild.gameObject.AddComponent<ARCameraManager>();
+        if (camChild.GetComponent<ARCameraBackground>() == null)
+            camChild.gameObject.AddComponent<ARCameraBackground>();
 
-            Debug.Log("[ARSceneSetup] Created XR Origin with AR Camera.");
+        // TrackedPoseDriver — must use SerializedObject so expectedControlType
+        // and bindings survive scene serialization (setting via InputActionProperty
+        // assignment at edit time drops these fields).
+        var tpd = camChild.GetComponent<TrackedPoseDriver>();
+        if (tpd == null) tpd = camChild.gameObject.AddComponent<TrackedPoseDriver>();
+        ConfigureTrackedPoseDriverAction(tpd, "m_PositionInput", "Position", "Vector3",
+            "<HandheldARInputDevice>/devicePosition");
+        ConfigureTrackedPoseDriverAction(tpd, "m_RotationInput", "Rotation", "Quaternion",
+            "<HandheldARInputDevice>/deviceRotation");
+
+        xrOrigin.Camera = camChild.GetComponent<Camera>();
+        Debug.Log("[ARSceneSetup] Wired XR Origin camera references.");
+
+        // AR Input Manager — starts XRInputSubsystem so HandheldARInputDevice is available
+        if (xrOrigin.GetComponent<ARInputManager>() == null)
+        {
+            xrOrigin.gameObject.AddComponent<ARInputManager>();
+            Debug.Log("[ARSceneSetup] Added ARInputManager.");
         }
 
         // AR Plane Manager
@@ -82,5 +125,33 @@ public static class ARSceneSetup
             UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
         Debug.Log("[ARSceneSetup] AR scene setup complete. Save the scene (Ctrl+S).");
+    }
+
+    static void ConfigureTrackedPoseDriverAction(TrackedPoseDriver tpd, string propName,
+        string actionName, string controlType, string bindingPath)
+    {
+        var so = new SerializedObject(tpd);
+        var prop = so.FindProperty(propName);
+        prop.FindPropertyRelative("m_UseReference").boolValue = false;
+
+        var action = prop.FindPropertyRelative("m_Action");
+        action.FindPropertyRelative("m_Name").stringValue = actionName;
+        action.FindPropertyRelative("m_Type").intValue = 0; // Value
+        action.FindPropertyRelative("m_ExpectedControlType").stringValue = controlType;
+
+        var bindings = action.FindPropertyRelative("m_SingletonActionBindings");
+        bindings.ClearArray();
+        bindings.InsertArrayElementAtIndex(0);
+        var b = bindings.GetArrayElementAtIndex(0);
+        b.FindPropertyRelative("m_Name").stringValue = "";
+        b.FindPropertyRelative("m_Id").stringValue = System.Guid.NewGuid().ToString();
+        b.FindPropertyRelative("m_Path").stringValue = bindingPath;
+        b.FindPropertyRelative("m_Action").stringValue = actionName;
+        b.FindPropertyRelative("m_Flags").intValue = 0;
+        b.FindPropertyRelative("m_Groups").stringValue = "";
+        b.FindPropertyRelative("m_Interactions").stringValue = "";
+        b.FindPropertyRelative("m_Processors").stringValue = "";
+
+        so.ApplyModifiedProperties();
     }
 }
