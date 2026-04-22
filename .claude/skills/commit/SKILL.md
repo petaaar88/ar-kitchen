@@ -72,4 +72,5 @@ Problem: when ARCore merged two detected planes the voxel jumped to the new plan
    EOF
    )"
    ```
-6. Run `git status` after to confirm the commit landed. Do not push unless the user asked.
+6. Run `git status` after to confirm the commit landed.
+7. Push to `origin`. If the branch has no upstream yet (new feature branch), use `git push -u origin HEAD`; otherwise `git push`. Do **not** force-push.
