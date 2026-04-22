@@ -18,14 +18,22 @@ public class VoxelMovement : MonoBehaviour
     {
         if (stateManager.CurrentMode != VoxelEditMode.Placement) return;
         if (stateManager.Controller == null) return;
-        if (Touchscreen.current == null) return;
 
-        var touch = Touchscreen.current.primaryTouch;
-        var phase = touch.phase.ReadValue();
-        if (phase != UnityEngine.InputSystem.TouchPhase.Moved &&
-            phase != UnityEngine.InputSystem.TouchPhase.Began) return;
+        Vector2 screenPos;
+        if (Touchscreen.current != null)
+        {
+            var phase = Touchscreen.current.primaryTouch.phase.ReadValue();
+            if (phase != UnityEngine.InputSystem.TouchPhase.Moved &&
+                phase != UnityEngine.InputSystem.TouchPhase.Began) return;
+            screenPos = Touchscreen.current.primaryTouch.position.ReadValue();
+        }
+        else if (Mouse.current != null && Mouse.current.leftButton.isPressed)
+        {
+            screenPos = Mouse.current.position.ReadValue();
+        }
+        else return;
 
-        if (!_raycastManager.Raycast(touch.position.ReadValue(), Hits, TrackableType.PlaneWithinPolygon))
+        if (!_raycastManager.Raycast(screenPos, Hits, TrackableType.PlaneWithinPolygon))
             return;
 
         stateManager.Controller.MoveTo(Hits[0].pose.position);

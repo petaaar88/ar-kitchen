@@ -30,11 +30,17 @@ public class VoxelPlacer : MonoBehaviour
     {
         if (!PlacementEnabled) return;
         if (IsPlaced) return;
-        if (Touchscreen.current == null) return;
 
-        var touch = Touchscreen.current.primaryTouch;
-        if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
-            TryPlace(touch.position.ReadValue());
+        if (Touchscreen.current != null)
+        {
+            var touch = Touchscreen.current.primaryTouch;
+            if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+                TryPlace(touch.position.ReadValue());
+        }
+        else if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            TryPlace(Mouse.current.position.ReadValue());
+        }
     }
 
     void TryPlace(Vector2 screenPos)
