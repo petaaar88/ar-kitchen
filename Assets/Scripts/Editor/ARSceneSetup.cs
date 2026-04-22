@@ -120,6 +120,17 @@ public static class ARSceneSetup
             Debug.Log("[ARSceneSetup] Added ARRaycastManager.");
         }
 
+        // EventSystem — required for all UI button clicks; must use
+        // InputSystemUIInputModule with the New Input System
+        if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+        {
+            var esGO = new GameObject("EventSystem");
+            Undo.RegisterCreatedObjectUndo(esGO, "Create EventSystem");
+            esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            esGO.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            Debug.Log("[ARSceneSetup] Created EventSystem with InputSystemUIInputModule.");
+        }
+
         EditorUtility.SetDirty(xrOrigin.gameObject);
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
             UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
