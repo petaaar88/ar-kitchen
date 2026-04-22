@@ -109,6 +109,83 @@ public static class UISceneSetup
         uiSo.FindProperty("rotationButton").objectReferenceValue  = rotationBtn;
         uiSo.ApplyModifiedProperties();
 
+        // ── ScalePanel ────────────────────────────────────────────────────
+        var scalePanel = CreateOrFind("ScalePanel", canvas.transform);
+        {
+            var rt = scalePanel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f, 220f);
+            rt.offsetMax = new Vector2(-20f, 560f);
+
+            if (scalePanel.GetComponent<VerticalLayoutGroup>() == null)
+            {
+                var vlg = scalePanel.AddComponent<VerticalLayoutGroup>();
+                vlg.childAlignment         = TextAnchor.MiddleCenter;
+                vlg.spacing                = 10f;
+                vlg.childForceExpandWidth  = true;
+                vlg.childForceExpandHeight = false;
+                vlg.padding                = new RectOffset(10, 10, 10, 10);
+            }
+            scalePanel.SetActive(false);
+        }
+
+        TextMeshProUGUI widthLbl, depthLbl, heightLbl;
+        var widthSlider  = CreateSliderRow("WidthRow",  "W 1.0m", scalePanel.transform, out widthLbl);
+        var depthSlider  = CreateSliderRow("DepthRow",  "D 1.0m", scalePanel.transform, out depthLbl);
+        var heightSlider = CreateSliderRow("HeightRow", "H 1.0m", scalePanel.transform, out heightLbl);
+
+        // ── VoxelScaleUI (on Canvas) ──────────────────────────────────────
+        var scaleUI = canvas.GetComponent<VoxelScaleUI>();
+        if (scaleUI == null) scaleUI = canvas.gameObject.AddComponent<VoxelScaleUI>();
+
+        var scaleSo = new SerializedObject(scaleUI);
+        scaleSo.FindProperty("stateManager").objectReferenceValue  = xrOrigin.GetComponent<VoxelStateManager>();
+        scaleSo.FindProperty("scalePanel").objectReferenceValue    = scalePanel;
+        scaleSo.FindProperty("widthSlider").objectReferenceValue   = widthSlider;
+        scaleSo.FindProperty("depthSlider").objectReferenceValue   = depthSlider;
+        scaleSo.FindProperty("heightSlider").objectReferenceValue  = heightSlider;
+        scaleSo.FindProperty("widthLabel").objectReferenceValue    = widthLbl;
+        scaleSo.FindProperty("depthLabel").objectReferenceValue    = depthLbl;
+        scaleSo.FindProperty("heightLabel").objectReferenceValue   = heightLbl;
+        scaleSo.ApplyModifiedProperties();
+
+        // ── RotationPanel ─────────────────────────────────────────────────
+        var rotPanel = CreateOrFind("RotationPanel", canvas.transform);
+        {
+            var rt = rotPanel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(0f, 220f);
+            rt.offsetMax = new Vector2(0f, 340f);
+
+            if (rotPanel.GetComponent<HorizontalLayoutGroup>() == null)
+            {
+                var hlg = rotPanel.AddComponent<HorizontalLayoutGroup>();
+                hlg.childAlignment         = TextAnchor.MiddleCenter;
+                hlg.spacing                = 40f;
+                hlg.childForceExpandWidth  = false;
+                hlg.childForceExpandHeight = false;
+            }
+            rotPanel.SetActive(false);
+        }
+
+        var rotLeftBtn  = CreateButton("RotateLeftButton",  "◄ 15°", rotPanel.transform);
+        var rotRightBtn = CreateButton("RotateRightButton", "15° ►", rotPanel.transform);
+
+        // ── VoxelRotationUI (on Canvas) ───────────────────────────────────
+        var rotUI = canvas.GetComponent<VoxelRotationUI>();
+        if (rotUI == null) rotUI = canvas.gameObject.AddComponent<VoxelRotationUI>();
+
+        var rotSo = new SerializedObject(rotUI);
+        rotSo.FindProperty("stateManager").objectReferenceValue    = xrOrigin.GetComponent<VoxelStateManager>();
+        rotSo.FindProperty("rotationPanel").objectReferenceValue   = rotPanel;
+        rotSo.FindProperty("rotateLeftButton").objectReferenceValue  = rotLeftBtn;
+        rotSo.FindProperty("rotateRightButton").objectReferenceValue = rotRightBtn;
+        rotSo.ApplyModifiedProperties();
+
         EditorUtility.SetDirty(canvas.gameObject);
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
             UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
@@ -128,6 +205,57 @@ public static class UISceneSetup
         go.transform.SetParent(parent, false);
         go.AddComponent<RectTransform>();
         return go;
+    }
+
+    static Slider CreateSliderRow(string rowName, string labelText, Transform parent, out TextMeshProUGUI labelOut)
+    {
+        var row = CreateOrFind(rowName, parent);
+        var rowRt = row.GetComponent<RectTransform>();
+        rowRt.sizeDelta = new Vector2(0f, 80f);
+
+        if (row.GetComponent<HorizontalLayoutGroup>() == null)
+        {
+            var hlg = row.AddComponent<HorizontalLayoutGroup>();
+            hlg.childAlignment         = TextAnchor.MiddleLeft;
+            hlg.spacing                = 10f;
+            hlg.childForceExpandWidth  = false;
+            hlg.childForceExpandHeight = true;
+            hlg.padding                = new RectOffset(10, 10, 0, 0);
+        }
+
+        // Label
+        var labelGO = CreateOrFind(rowName + "_Label", row.transform);
+        var labelRt = labelGO.GetComponent<RectTransform>();
+        labelRt.sizeDelta = new Vector2(160f, 0f);
+        labelOut = labelGO.GetComponent<TextMeshProUGUI>();
+        if (labelOut == null) labelOut = labelGO.AddComponent<TextMeshProUGUI>();
+        labelOut.text      = labelText;
+        labelOut.fontSize  = 32f;
+        labelOut.alignment = TextAlignmentOptions.MidlineLeft;
+        labelOut.color     = Color.white;
+
+        // Slider (use Unity default controls)
+        var sliderGO = CreateOrFind(rowName + "_Slider", row.transform);
+        var sliderRt = sliderGO.GetComponent<RectTransform>();
+        sliderRt.sizeDelta = new Vector2(560f, 0f);
+
+        var slider = sliderGO.GetComponent<Slider>();
+        if (slider == null)
+        {
+            // Build minimal slider: background + fill + handle
+            var resources = new DefaultControls.Resources();
+            var builtSlider = DefaultControls.CreateSlider(resources);
+            builtSlider.name = rowName + "_Slider";
+            builtSlider.transform.SetParent(row.transform, false);
+            var brt = builtSlider.GetComponent<RectTransform>();
+            brt.sizeDelta = new Vector2(560f, 40f);
+            slider = builtSlider.GetComponent<Slider>();
+
+            // Remove the label placeholder we made since CreateSlider made its own GO
+            Object.DestroyImmediate(sliderGO);
+        }
+
+        return slider;
     }
 
     static Button CreateButton(string name, string label, Transform parent)
