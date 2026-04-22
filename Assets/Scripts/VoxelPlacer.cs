@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.InputSystem;
@@ -16,7 +17,8 @@ public class VoxelPlacer : MonoBehaviour
     [SerializeField] GameObject voxelPrefab;
 
     ARRaycastManager _raycastManager;
-    static readonly List<ARRaycastHit> Hits = new();
+    static readonly List<ARRaycastHit>  Hits   = new();
+    static readonly List<RaycastResult> UIHits = new();
 
     public GameObject Voxel { get; private set; }
     public bool IsPlaced { get; private set; }
@@ -45,6 +47,8 @@ public class VoxelPlacer : MonoBehaviour
 
     void TryPlace(Vector2 screenPos)
     {
+        if (IsPointerOverUI(screenPos)) return;
+
         if (!_raycastManager.Raycast(screenPos, Hits, TrackableType.PlaneWithinPolygon))
             return;
 
@@ -59,5 +63,14 @@ public class VoxelPlacer : MonoBehaviour
     {
         IsPlaced = false;
         PlacementEnabled = true;
+    }
+
+    static bool IsPointerOverUI(Vector2 screenPos)
+    {
+        if (EventSystem.current == null) return false;
+        var data = new PointerEventData(EventSystem.current) { position = screenPos };
+        UIHits.Clear();
+        EventSystem.current.RaycastAll(data, UIHits);
+        return UIHits.Count > 0;
     }
 }
