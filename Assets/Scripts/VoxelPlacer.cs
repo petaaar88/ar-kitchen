@@ -22,6 +22,8 @@ public class VoxelPlacer : MonoBehaviour
     public bool IsPlaced { get; private set; }
     public bool PlacementEnabled { get; set; } = true;
 
+    public event System.Action OnPlaced;
+
     void Awake() => _raycastManager = GetComponent<ARRaycastManager>();
 
     void Update()
@@ -31,8 +33,8 @@ public class VoxelPlacer : MonoBehaviour
         if (Touchscreen.current == null) return;
 
         var touch = Touchscreen.current.primaryTouch;
-        //if (touch.phase.ReadValue() == TouchPhase.Began)
-        //    TryPlace(touch.position.ReadValue());
+        if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+            TryPlace(touch.position.ReadValue());
     }
 
     void TryPlace(Vector2 screenPos)
@@ -43,6 +45,7 @@ public class VoxelPlacer : MonoBehaviour
         var pose = Hits[0].pose;
         Voxel = Instantiate(voxelPrefab, pose.position, Quaternion.identity);
         IsPlaced = true;
+        OnPlaced?.Invoke();
     }
 
     /// <summary>Re-enables placement for Edit > Placement mode.</summary>
