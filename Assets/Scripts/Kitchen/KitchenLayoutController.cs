@@ -85,19 +85,21 @@ public class KitchenLayoutController : MonoBehaviour
 
     void Reposition()
     {
-        // Wall = right edge of voxel (x = +hw). Elements line up along +Z from -hd.
-        // Each element rotated -90° around Y so its local +X (width) points along
-        // voxel +Z, and its local +Z (depth) points toward voxel -X (into the room).
+        // Wall = left edge of voxel (x = -hw). Elements line up along -Z from the
+        // back (+hd) toward the front. Rotation is +270° around Y so the labeled
+        // face points outward (room side). Pivot is offset by (d, 0, -w) per
+        // element so the body's world AABB stays snug against the -X wall.
         float hw = voxel.Width * 0.5f;
         float hd = voxel.Depth * 0.5f;
-        var rot = Quaternion.Euler(0f, -90f, 0f);
+        var rot = Quaternion.Euler(0f, 270f, 0f);
         float used = 0f;
         foreach (var view in _placed)
         {
             if (view == null) continue;
-            view.transform.localPosition = new Vector3(hw, 0f, -hd + used);
+            var def = view.Definition;
+            view.transform.localPosition = new Vector3(-hw + def.DepthMeters, 0f, hd - used - def.WidthMeters);
             view.transform.localRotation = rot;
-            used += view.Definition.WidthMeters;
+            used += def.WidthMeters;
         }
         UsedLength = used;
     }

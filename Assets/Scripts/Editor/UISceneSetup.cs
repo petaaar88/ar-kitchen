@@ -216,10 +216,97 @@ public static class UISceneSetup
             catalogLabels[i]  = btn.GetComponentInChildren<TextMeshProUGUI>();
         }
 
+        // RemainingLabel — left portion of row at y 380..460
+        var remainingGO = CreateOrFind("RemainingLabel", canvas.transform);
+        {
+            var rt       = remainingGO.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  380f);
+            rt.offsetMax = new Vector2(-320f, 460f);
+            remainingGO.SetActive(false);
+        }
+        var remainingTmp = remainingGO.GetComponent<TextMeshProUGUI>() ?? remainingGO.AddComponent<TextMeshProUGUI>();
+        remainingTmp.text      = "0.0 m free";
+        remainingTmp.fontSize  = 48f;
+        remainingTmp.alignment = TextAlignmentOptions.Center;
+        remainingTmp.color     = Color.white;
+
+        // RemoveLastButton — right side of the readout row
+        var removeBtn = CreateButton("RemoveLastButton", "Remove last", canvas.transform, 280f, 80f, 28f);
+        {
+            var rt = removeBtn.GetComponent<RectTransform>();
+            rt.anchorMin        = new Vector2(1f, 0f);
+            rt.anchorMax        = new Vector2(1f, 0f);
+            rt.pivot            = new Vector2(1f, 0f);
+            rt.anchoredPosition = new Vector2(-20f, 390f);
+            rt.sizeDelta        = new Vector2(280f, 80f);
+            removeBtn.gameObject.SetActive(false);
+        }
+
+        // Toast — warning bar above the remaining label (y 480..580)
+        var toastGO = CreateOrFind("KitchenToast", canvas.transform);
+        {
+            var rt       = toastGO.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(40f,  480f);
+            rt.offsetMax = new Vector2(-40f, 580f);
+            toastGO.SetActive(false);
+        }
+        var toastBg = toastGO.GetComponent<Image>() ?? toastGO.AddComponent<Image>();
+        toastBg.color = new Color(0.6f, 0.2f, 0.2f, 0.85f);
+
+        var toastLabelGO = CreateOrFind("Label", toastGO.transform);
+        var toastLabelRt = toastLabelGO.GetComponent<RectTransform>();
+        toastLabelRt.anchorMin = Vector2.zero;
+        toastLabelRt.anchorMax = Vector2.one;
+        toastLabelRt.offsetMin = new Vector2(20f, 0f);
+        toastLabelRt.offsetMax = new Vector2(-20f, 0f);
+        var toastTmp = toastLabelGO.GetComponent<TextMeshProUGUI>() ?? toastLabelGO.AddComponent<TextMeshProUGUI>();
+        toastTmp.text      = "";
+        toastTmp.fontSize  = 32f;
+        toastTmp.alignment = TextAlignmentOptions.Center;
+        toastTmp.color     = Color.white;
+
         var catalogUI = canvas.GetComponent<KitchenCatalogUI>() ?? canvas.gameObject.AddComponent<KitchenCatalogUI>();
         var catSo = new SerializedObject(catalogUI);
-        catSo.FindProperty("stateManager").objectReferenceValue = xrOrigin.GetComponent<VoxelStateManager>();
-        catSo.FindProperty("catalogPanel").objectReferenceValue = catalogPanel;
+        catSo.FindProperty("stateManager").objectReferenceValue   = xrOrigin.GetComponent<VoxelStateManager>();
+        catSo.FindProperty("catalogPanel").objectReferenceValue   = catalogPanel;
+        // MandatoryBanner — top-of-screen warning bar, left of the Planes button
+        var bannerGO = CreateOrFind("MandatoryBanner", canvas.transform);
+        {
+            var rt       = bannerGO.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot     = new Vector2(0.5f, 1f);
+            rt.offsetMin = new Vector2(20f, -130f);
+            rt.offsetMax = new Vector2(-150f, -20f);
+            bannerGO.SetActive(false);
+        }
+        var bannerBg = bannerGO.GetComponent<Image>() ?? bannerGO.AddComponent<Image>();
+        bannerBg.color = new Color(0.85f, 0.55f, 0.1f, 0.85f);
+
+        var bannerLabelGO = CreateOrFind("Label", bannerGO.transform);
+        var bannerLabelRt = bannerLabelGO.GetComponent<RectTransform>();
+        bannerLabelRt.anchorMin = Vector2.zero;
+        bannerLabelRt.anchorMax = Vector2.one;
+        bannerLabelRt.offsetMin = new Vector2(20f, 0f);
+        bannerLabelRt.offsetMax = new Vector2(-20f, 0f);
+        var bannerTmp = bannerLabelGO.GetComponent<TextMeshProUGUI>() ?? bannerLabelGO.AddComponent<TextMeshProUGUI>();
+        bannerTmp.text      = "";
+        bannerTmp.fontSize  = 36f;
+        bannerTmp.alignment = TextAlignmentOptions.Center;
+        bannerTmp.color     = Color.white;
+
+        catSo.FindProperty("remainingLabel").objectReferenceValue       = remainingTmp;
+        catSo.FindProperty("removeLastButton").objectReferenceValue     = removeBtn;
+        catSo.FindProperty("toast").objectReferenceValue                = toastGO;
+        catSo.FindProperty("toastLabel").objectReferenceValue           = toastTmp;
+        catSo.FindProperty("mandatoryBanner").objectReferenceValue      = bannerGO;
+        catSo.FindProperty("mandatoryBannerLabel").objectReferenceValue = bannerTmp;
         var entriesProp = catSo.FindProperty("entries");
         entriesProp.arraySize = 4;
         for (int i = 0; i < 4; i++)
