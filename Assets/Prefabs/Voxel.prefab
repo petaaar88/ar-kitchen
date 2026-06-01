@@ -460,6 +460,7 @@ GameObject:
   m_Component:
   - component: {fileID: 23435314978360753}
   - component: {fileID: 289173944659139515}
+  - component: {fileID: 2565595186253532758}
   m_Layer: 0
   m_Name: Voxel
   m_TagString: Untagged
@@ -508,6 +509,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VoxelController
   fill: {fileID: 6730227904444129919}
+--- !u!114 &2565595186253532758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2924027894407134053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb0f8753e10b0d2f9738dea214a1a87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KitchenLayoutController
+  voxel: {fileID: 289173944659139515}
+  elementPrefab: {fileID: 7149980500960220788, guid: e3d99a3d4c15ae666a477b5f1ce2d861, type: 3}
 --- !u!1 &2955574180221748869
 GameObject:
   m_ObjectHideFlags: 0

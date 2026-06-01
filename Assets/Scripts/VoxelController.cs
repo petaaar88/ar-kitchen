@@ -12,6 +12,8 @@ public class VoxelController : MonoBehaviour
     public float Depth  => _depth;
     public float Height => _height;
 
+    public event System.Action OnResized;
+
     void Start() => UpdateGeometry();
 
     public void Resize(float width, float depth, float height)
@@ -20,6 +22,7 @@ public class VoxelController : MonoBehaviour
         _depth  = Mathf.Max(0.1f, depth);
         _height = Mathf.Max(0.1f, height);
         UpdateGeometry();
+        OnResized?.Invoke();
     }
 
     public void MoveTo(Vector3 worldPos) => transform.position = worldPos;

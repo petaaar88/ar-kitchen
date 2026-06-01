@@ -84,15 +84,16 @@ public static class UISceneSetup
             subHlg.childForceExpandWidth  = false;
             subHlg.childForceExpandHeight = false;
 
-            // 3 × 200 + 2 × 20 spacing = 640
+            // 4 × 200 + 3 × 20 spacing = 860
             var subRt     = subPanel.GetComponent<RectTransform>();
-            subRt.sizeDelta = new Vector2(640f, 100f);
+            subRt.sizeDelta = new Vector2(860f, 100f);
             subPanel.SetActive(false);
         }
 
         var scaleBtn     = CreateButton("ScaleButton",     "Scale",  subPanel.transform, 200f, 100f);
         var placementBtn = CreateButton("PlacementButton", "Move",   subPanel.transform, 200f, 100f);
         var rotationBtn  = CreateButton("RotationButton",  "Rotate", subPanel.transform, 200f, 100f);
+        var fillBtn      = CreateButton("FillButton",      "Fill",   subPanel.transform, 200f, 100f);
 
         // ── KitchenUI (on Canvas) ─────────────────────────────────────────
         var ui = canvas.GetComponent<KitchenUI>() ?? canvas.gameObject.AddComponent<KitchenUI>();
@@ -105,6 +106,7 @@ public static class UISceneSetup
         uiSo.FindProperty("scaleButton").objectReferenceValue     = scaleBtn;
         uiSo.FindProperty("placementButton").objectReferenceValue = placementBtn;
         uiSo.FindProperty("rotationButton").objectReferenceValue  = rotationBtn;
+        uiSo.FindProperty("fillButton").objectReferenceValue      = fillBtn;
         uiSo.ApplyModifiedProperties();
 
         // ── ScalePanel ────────────────────────────────────────────────────
@@ -174,6 +176,60 @@ public static class UISceneSetup
         rotSo.FindProperty("rotateLeftButton").objectReferenceValue  = rotLeftBtn;
         rotSo.FindProperty("rotateRightButton").objectReferenceValue = rotRightBtn;
         rotSo.ApplyModifiedProperties();
+
+        // ── CatalogPanel (FillKitchen mode) ───────────────────────────────
+        var defs = new[]
+        {
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Fridge.asset"),
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Stove.asset"),
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Sink.asset"),
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Counter.asset"),
+        };
+        bool defsOk = true;
+        for (int i = 0; i < defs.Length; i++)
+            if (defs[i] == null) { Debug.LogWarning($"[UISceneSetup] Missing kitchen element definition #{i}. Run 'Create Default Kitchen Definitions' first."); defsOk = false; }
+
+        var catalogPanel = CreateOrFind("CatalogPanel", canvas.transform);
+        {
+            var rt       = catalogPanel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  210f);
+            rt.offsetMax = new Vector2(-20f, 370f);
+
+            var hlg = catalogPanel.GetComponent<HorizontalLayoutGroup>() ?? catalogPanel.AddComponent<HorizontalLayoutGroup>();
+            hlg.childAlignment         = TextAnchor.MiddleCenter;
+            hlg.spacing                = 20f;
+            hlg.childForceExpandWidth  = false;
+            hlg.childForceExpandHeight = false;
+            catalogPanel.SetActive(false);
+        }
+
+        var catalogButtons = new Button[4];
+        var catalogLabels  = new TextMeshProUGUI[4];
+        for (int i = 0; i < 4; i++)
+        {
+            string label = defsOk ? defs[i].DisplayName : $"Slot {i}";
+            var btn = CreateButton($"CatalogButton_{label}", label, catalogPanel.transform, 230f, 140f, 32f);
+            catalogButtons[i] = btn;
+            catalogLabels[i]  = btn.GetComponentInChildren<TextMeshProUGUI>();
+        }
+
+        var catalogUI = canvas.GetComponent<KitchenCatalogUI>() ?? canvas.gameObject.AddComponent<KitchenCatalogUI>();
+        var catSo = new SerializedObject(catalogUI);
+        catSo.FindProperty("stateManager").objectReferenceValue = xrOrigin.GetComponent<VoxelStateManager>();
+        catSo.FindProperty("catalogPanel").objectReferenceValue = catalogPanel;
+        var entriesProp = catSo.FindProperty("entries");
+        entriesProp.arraySize = 4;
+        for (int i = 0; i < 4; i++)
+        {
+            var elem = entriesProp.GetArrayElementAtIndex(i);
+            elem.FindPropertyRelative("definition").objectReferenceValue = defs[i];
+            elem.FindPropertyRelative("button").objectReferenceValue     = catalogButtons[i];
+            elem.FindPropertyRelative("label").objectReferenceValue      = catalogLabels[i];
+        }
+        catSo.ApplyModifiedProperties();
 
         // ── PlaneToggleUI (on Canvas) ─────────────────────────────────────
         var planeManager = xrOrigin.GetComponentInChildren<ARPlaneManager>();
