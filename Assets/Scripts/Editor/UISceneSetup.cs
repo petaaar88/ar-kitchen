@@ -84,15 +84,16 @@ public static class UISceneSetup
             subHlg.childForceExpandWidth  = false;
             subHlg.childForceExpandHeight = false;
 
-            // 3 × 200 + 2 × 20 spacing = 640
+            // 4 × 200 + 3 × 20 spacing = 860
             var subRt     = subPanel.GetComponent<RectTransform>();
-            subRt.sizeDelta = new Vector2(640f, 100f);
+            subRt.sizeDelta = new Vector2(860f, 100f);
             subPanel.SetActive(false);
         }
 
         var scaleBtn     = CreateButton("ScaleButton",     "Scale",  subPanel.transform, 200f, 100f);
         var placementBtn = CreateButton("PlacementButton", "Move",   subPanel.transform, 200f, 100f);
         var rotationBtn  = CreateButton("RotationButton",  "Rotate", subPanel.transform, 200f, 100f);
+        var fillBtn      = CreateButton("FillButton",      "Fill",   subPanel.transform, 200f, 100f);
 
         // ── KitchenUI (on Canvas) ─────────────────────────────────────────
         var ui = canvas.GetComponent<KitchenUI>() ?? canvas.gameObject.AddComponent<KitchenUI>();
@@ -105,6 +106,7 @@ public static class UISceneSetup
         uiSo.FindProperty("scaleButton").objectReferenceValue     = scaleBtn;
         uiSo.FindProperty("placementButton").objectReferenceValue = placementBtn;
         uiSo.FindProperty("rotationButton").objectReferenceValue  = rotationBtn;
+        uiSo.FindProperty("fillButton").objectReferenceValue      = fillBtn;
         uiSo.ApplyModifiedProperties();
 
         // ── ScalePanel ────────────────────────────────────────────────────
@@ -174,6 +176,147 @@ public static class UISceneSetup
         rotSo.FindProperty("rotateLeftButton").objectReferenceValue  = rotLeftBtn;
         rotSo.FindProperty("rotateRightButton").objectReferenceValue = rotRightBtn;
         rotSo.ApplyModifiedProperties();
+
+        // ── CatalogPanel (FillKitchen mode) ───────────────────────────────
+        var defs = new[]
+        {
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Fridge.asset"),
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Stove.asset"),
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Sink.asset"),
+            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Counter.asset"),
+        };
+        bool defsOk = true;
+        for (int i = 0; i < defs.Length; i++)
+            if (defs[i] == null) { Debug.LogWarning($"[UISceneSetup] Missing kitchen element definition #{i}. Run 'Create Default Kitchen Definitions' first."); defsOk = false; }
+
+        var catalogPanel = CreateOrFind("CatalogPanel", canvas.transform);
+        {
+            var rt       = catalogPanel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  210f);
+            rt.offsetMax = new Vector2(-20f, 370f);
+
+            var hlg = catalogPanel.GetComponent<HorizontalLayoutGroup>() ?? catalogPanel.AddComponent<HorizontalLayoutGroup>();
+            hlg.childAlignment         = TextAnchor.MiddleCenter;
+            hlg.spacing                = 20f;
+            hlg.childForceExpandWidth  = false;
+            hlg.childForceExpandHeight = false;
+            catalogPanel.SetActive(false);
+        }
+
+        var catalogButtons = new Button[4];
+        var catalogLabels  = new TextMeshProUGUI[4];
+        for (int i = 0; i < 4; i++)
+        {
+            string label = defsOk ? defs[i].DisplayName : $"Slot {i}";
+            var btn = CreateButton($"CatalogButton_{label}", label, catalogPanel.transform, 230f, 140f, 32f);
+            catalogButtons[i] = btn;
+            catalogLabels[i]  = btn.GetComponentInChildren<TextMeshProUGUI>();
+        }
+
+        // RemainingLabel — left portion of row at y 380..460
+        var remainingGO = CreateOrFind("RemainingLabel", canvas.transform);
+        {
+            var rt       = remainingGO.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  380f);
+            rt.offsetMax = new Vector2(-320f, 460f);
+            remainingGO.SetActive(false);
+        }
+        var remainingTmp = remainingGO.GetComponent<TextMeshProUGUI>() ?? remainingGO.AddComponent<TextMeshProUGUI>();
+        remainingTmp.text      = "0.0 m free";
+        remainingTmp.fontSize  = 48f;
+        remainingTmp.alignment = TextAlignmentOptions.Center;
+        remainingTmp.color     = Color.white;
+
+        // RemoveLastButton — right side of the readout row
+        var removeBtn = CreateButton("RemoveLastButton", "Remove last", canvas.transform, 280f, 80f, 28f);
+        {
+            var rt = removeBtn.GetComponent<RectTransform>();
+            rt.anchorMin        = new Vector2(1f, 0f);
+            rt.anchorMax        = new Vector2(1f, 0f);
+            rt.pivot            = new Vector2(1f, 0f);
+            rt.anchoredPosition = new Vector2(-20f, 390f);
+            rt.sizeDelta        = new Vector2(280f, 80f);
+            removeBtn.gameObject.SetActive(false);
+        }
+
+        // Toast — warning bar above the remaining label (y 480..580)
+        var toastGO = CreateOrFind("KitchenToast", canvas.transform);
+        {
+            var rt       = toastGO.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(40f,  480f);
+            rt.offsetMax = new Vector2(-40f, 580f);
+            toastGO.SetActive(false);
+        }
+        var toastBg = toastGO.GetComponent<Image>() ?? toastGO.AddComponent<Image>();
+        toastBg.color = new Color(0.6f, 0.2f, 0.2f, 0.85f);
+
+        var toastLabelGO = CreateOrFind("Label", toastGO.transform);
+        var toastLabelRt = toastLabelGO.GetComponent<RectTransform>();
+        toastLabelRt.anchorMin = Vector2.zero;
+        toastLabelRt.anchorMax = Vector2.one;
+        toastLabelRt.offsetMin = new Vector2(20f, 0f);
+        toastLabelRt.offsetMax = new Vector2(-20f, 0f);
+        var toastTmp = toastLabelGO.GetComponent<TextMeshProUGUI>() ?? toastLabelGO.AddComponent<TextMeshProUGUI>();
+        toastTmp.text      = "";
+        toastTmp.fontSize  = 32f;
+        toastTmp.alignment = TextAlignmentOptions.Center;
+        toastTmp.color     = Color.white;
+
+        var catalogUI = canvas.GetComponent<KitchenCatalogUI>() ?? canvas.gameObject.AddComponent<KitchenCatalogUI>();
+        var catSo = new SerializedObject(catalogUI);
+        catSo.FindProperty("stateManager").objectReferenceValue   = xrOrigin.GetComponent<VoxelStateManager>();
+        catSo.FindProperty("catalogPanel").objectReferenceValue   = catalogPanel;
+        // MandatoryBanner — top-of-screen warning bar, left of the Planes button
+        var bannerGO = CreateOrFind("MandatoryBanner", canvas.transform);
+        {
+            var rt       = bannerGO.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot     = new Vector2(0.5f, 1f);
+            rt.offsetMin = new Vector2(20f, -130f);
+            rt.offsetMax = new Vector2(-150f, -20f);
+            bannerGO.SetActive(false);
+        }
+        var bannerBg = bannerGO.GetComponent<Image>() ?? bannerGO.AddComponent<Image>();
+        bannerBg.color = new Color(0.85f, 0.55f, 0.1f, 0.85f);
+
+        var bannerLabelGO = CreateOrFind("Label", bannerGO.transform);
+        var bannerLabelRt = bannerLabelGO.GetComponent<RectTransform>();
+        bannerLabelRt.anchorMin = Vector2.zero;
+        bannerLabelRt.anchorMax = Vector2.one;
+        bannerLabelRt.offsetMin = new Vector2(20f, 0f);
+        bannerLabelRt.offsetMax = new Vector2(-20f, 0f);
+        var bannerTmp = bannerLabelGO.GetComponent<TextMeshProUGUI>() ?? bannerLabelGO.AddComponent<TextMeshProUGUI>();
+        bannerTmp.text      = "";
+        bannerTmp.fontSize  = 36f;
+        bannerTmp.alignment = TextAlignmentOptions.Center;
+        bannerTmp.color     = Color.white;
+
+        catSo.FindProperty("remainingLabel").objectReferenceValue       = remainingTmp;
+        catSo.FindProperty("removeLastButton").objectReferenceValue     = removeBtn;
+        catSo.FindProperty("toast").objectReferenceValue                = toastGO;
+        catSo.FindProperty("toastLabel").objectReferenceValue           = toastTmp;
+        catSo.FindProperty("mandatoryBanner").objectReferenceValue      = bannerGO;
+        catSo.FindProperty("mandatoryBannerLabel").objectReferenceValue = bannerTmp;
+        var entriesProp = catSo.FindProperty("entries");
+        entriesProp.arraySize = 4;
+        for (int i = 0; i < 4; i++)
+        {
+            var elem = entriesProp.GetArrayElementAtIndex(i);
+            elem.FindPropertyRelative("definition").objectReferenceValue = defs[i];
+            elem.FindPropertyRelative("button").objectReferenceValue     = catalogButtons[i];
+            elem.FindPropertyRelative("label").objectReferenceValue      = catalogLabels[i];
+        }
+        catSo.ApplyModifiedProperties();
 
         // ── PlaneToggleUI (on Canvas) ─────────────────────────────────────
         var planeManager = xrOrigin.GetComponentInChildren<ARPlaneManager>();
