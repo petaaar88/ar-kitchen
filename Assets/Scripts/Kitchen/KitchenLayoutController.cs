@@ -15,7 +15,7 @@ public class KitchenLayoutController : MonoBehaviour
 
     public IReadOnlyList<KitchenElementView> Placed => _placed;
     public float UsedLength { get; private set; }
-    public float RemainingLength => Mathf.Max(0f, voxel.Width - UsedLength);
+    public float RemainingLength => Mathf.Max(0f, voxel.Depth - UsedLength);
 
     public event System.Action OnLayoutChanged;
 
@@ -43,7 +43,7 @@ public class KitchenLayoutController : MonoBehaviour
     }
 
     public bool DepthFits(KitchenElementDefinition def) =>
-        def != null && def.DepthMeters <= voxel.Depth + Epsilon;
+        def != null && def.DepthMeters <= voxel.Width + Epsilon;
 
     public bool LengthFits(KitchenElementDefinition def) =>
         def != null && def.WidthMeters <= RemainingLength + Epsilon;
@@ -85,15 +85,20 @@ public class KitchenLayoutController : MonoBehaviour
 
     void Reposition()
     {
+        // Wall = right edge of voxel (x = +hw). Elements line up along +Z from -hd.
+        // Each element rotated -90° around Y so its local +X (width) points along
+        // voxel +Z, and its local +Z (depth) points toward voxel -X (into the room).
         float hw = voxel.Width * 0.5f;
         float hd = voxel.Depth * 0.5f;
-        float x = -hw;
+        var rot = Quaternion.Euler(0f, -90f, 0f);
+        float used = 0f;
         foreach (var view in _placed)
         {
             if (view == null) continue;
-            view.transform.localPosition = new Vector3(x, 0f, -hd);
-            x += view.Definition.WidthMeters;
+            view.transform.localPosition = new Vector3(hw, 0f, -hd + used);
+            view.transform.localRotation = rot;
+            used += view.Definition.WidthMeters;
         }
-        UsedLength = x + hw;
+        UsedLength = used;
     }
 }
