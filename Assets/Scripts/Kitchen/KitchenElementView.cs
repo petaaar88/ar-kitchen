@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -8,7 +7,6 @@ public class KitchenElementView : MonoBehaviour
     // layout controller can place transform.position at the wall without offsets.
     // Apply() instantiates the definition's FBX model and shifts it so its
     // bounding-box min corner sits exactly on that origin.
-    [SerializeField] TextMeshPro label;
     [Tooltip("Extra yaw applied to the model so its front faces the room. Models are authored facing the wall, hence 180°.")]
     [SerializeField] float modelYawOffset = 180f;
 
@@ -45,13 +43,6 @@ public class KitchenElementView : MonoBehaviour
             // occupies [0,w] x [0,h] x [0,d] in local space, like the old cube did.
             if (TryGetLocalBounds(t, out var bounds))
                 t.localPosition = -bounds.min;
-        }
-
-        float w = def.WidthMeters, h = def.HeightMeters, d = def.DepthMeters;
-        if (label != null)
-        {
-            label.text = string.IsNullOrEmpty(def.Code) ? def.DisplayName : $"{def.Code} {def.DisplayName}";
-            label.transform.localPosition = new Vector3(w * 0.5f, h + 0.08f, d * 0.5f);
         }
     }
 
