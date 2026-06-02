@@ -93,16 +93,17 @@ public static class UISceneSetup
             subHlg.childForceExpandWidth  = false;
             subHlg.childForceExpandHeight = false;
 
-            // 4 × 200 + 3 × 20 spacing = 860
+            // 5 × 150 + 4 × 20 spacing = 830
             var subRt     = subPanel.GetComponent<RectTransform>();
-            subRt.sizeDelta = new Vector2(860f, 100f);
+            subRt.sizeDelta = new Vector2(830f, 100f);
             subPanel.SetActive(false);
         }
 
-        var scaleBtn     = CreateButton("ScaleButton",     "Scale",  subPanel.transform, 200f, 100f);
-        var placementBtn = CreateButton("PlacementButton", "Move",   subPanel.transform, 200f, 100f);
-        var rotationBtn  = CreateButton("RotationButton",  "Rotate", subPanel.transform, 200f, 100f);
-        var fillBtn      = CreateButton("FillButton",      "Fill",   subPanel.transform, 200f, 100f);
+        var scaleBtn     = CreateButton("ScaleButton",     "Scale",  subPanel.transform, 150f, 100f, 30f);
+        var placementBtn = CreateButton("PlacementButton", "Move",   subPanel.transform, 150f, 100f, 30f);
+        var rotationBtn  = CreateButton("RotationButton",  "Rotate", subPanel.transform, 150f, 100f, 30f);
+        var fillBtn      = CreateButton("FillButton",      "Fill",   subPanel.transform, 150f, 100f, 30f);
+        var colorBtn     = CreateButton("ColorButton",     "Color",  subPanel.transform, 150f, 100f, 30f);
 
         // ── KitchenUI (on Canvas) ─────────────────────────────────────────
         var ui = canvas.GetComponent<KitchenUI>() ?? canvas.gameObject.AddComponent<KitchenUI>();
@@ -116,6 +117,7 @@ public static class UISceneSetup
         uiSo.FindProperty("placementButton").objectReferenceValue = placementBtn;
         uiSo.FindProperty("rotationButton").objectReferenceValue  = rotationBtn;
         uiSo.FindProperty("fillButton").objectReferenceValue      = fillBtn;
+        uiSo.FindProperty("colorButton").objectReferenceValue     = colorBtn;
         uiSo.ApplyModifiedProperties();
 
         // ── ScalePanel ────────────────────────────────────────────────────
@@ -185,6 +187,73 @@ public static class UISceneSetup
         rotSo.FindProperty("rotateLeftButton").objectReferenceValue  = rotLeftBtn;
         rotSo.FindProperty("rotateRightButton").objectReferenceValue = rotRightBtn;
         rotSo.ApplyModifiedProperties();
+
+        // ── ColorPanel (Color mode) ───────────────────────────────────────
+        // Selector row (Main/Secondary + preview swatch) on top, then R/G/B
+        // slider rows. Same stretch-anchored row scheme as ScalePanel.
+        var colorPanel = CreateOrFind("ColorPanel", canvas.transform);
+        {
+            var rt       = colorPanel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  210f);
+            rt.offsetMax = new Vector2(-20f, 680f);
+
+            var vlg = colorPanel.GetComponent<VerticalLayoutGroup>();
+            if (vlg != null) Object.DestroyImmediate(vlg);
+            colorPanel.SetActive(false);
+        }
+
+        // Selector row (top): Main / Secondary buttons + a colour preview swatch
+        var selectorRow = CreateOrFind("ColorSelectorRow", colorPanel.transform);
+        {
+            var rt       = selectorRow.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  340f);
+            rt.offsetMax = new Vector2(-20f, 440f);
+
+            var hlg = selectorRow.GetComponent<HorizontalLayoutGroup>() ?? selectorRow.AddComponent<HorizontalLayoutGroup>();
+            hlg.childAlignment         = TextAnchor.MiddleCenter;
+            hlg.spacing                = 16f;
+            hlg.childForceExpandWidth  = false;
+            hlg.childForceExpandHeight = false;
+            hlg.padding                = new RectOffset(10, 10, 0, 0);
+        }
+        var mainColorBtn      = CreateButton("MainColorButton",      "Main",      selectorRow.transform, 320f, 90f, 32f);
+        var secondaryColorBtn = CreateButton("SecondaryColorButton", "Secondary", selectorRow.transform, 320f, 90f, 32f);
+        var previewGO = CreateOrFind("ColorPreview", selectorRow.transform);
+        previewGO.GetComponent<RectTransform>().sizeDelta = new Vector2(120f, 90f);
+        var previewImg = previewGO.GetComponent<Image>() ?? previewGO.AddComponent<Image>();
+
+        TextMeshProUGUI rLbl, gLbl, bLbl;
+        var rSlider = CreateSliderRow("ColorRRow", "R 0.00", colorPanel.transform, out rLbl, 230f, 330f);
+        var gSlider = CreateSliderRow("ColorGRow", "G 0.00", colorPanel.transform, out gLbl, 120f, 220f);
+        var bSlider = CreateSliderRow("ColorBRow", "B 0.00", colorPanel.transform, out bLbl,  10f, 110f);
+
+        var mainMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/KitchenMainMaterial.mat");
+        var secMat  = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/KitchenSecondaryMaterial.mat");
+        if (mainMat == null || secMat == null)
+            Debug.LogWarning("[UISceneSetup] Kitchen materials not found under Assets/Materials — wire them manually.");
+
+        var colorUI = canvas.GetComponent<MaterialColorUI>() ?? canvas.gameObject.AddComponent<MaterialColorUI>();
+        var colorSo = new SerializedObject(colorUI);
+        colorSo.FindProperty("stateManager").objectReferenceValue      = xrOrigin.GetComponent<VoxelStateManager>();
+        colorSo.FindProperty("colorPanel").objectReferenceValue        = colorPanel;
+        colorSo.FindProperty("mainMaterial").objectReferenceValue      = mainMat;
+        colorSo.FindProperty("secondaryMaterial").objectReferenceValue = secMat;
+        colorSo.FindProperty("mainButton").objectReferenceValue        = mainColorBtn;
+        colorSo.FindProperty("secondaryButton").objectReferenceValue   = secondaryColorBtn;
+        colorSo.FindProperty("previewSwatch").objectReferenceValue     = previewImg;
+        colorSo.FindProperty("redSlider").objectReferenceValue         = rSlider;
+        colorSo.FindProperty("greenSlider").objectReferenceValue       = gSlider;
+        colorSo.FindProperty("blueSlider").objectReferenceValue        = bSlider;
+        colorSo.FindProperty("redLabel").objectReferenceValue          = rLbl;
+        colorSo.FindProperty("greenLabel").objectReferenceValue        = gLbl;
+        colorSo.FindProperty("blueLabel").objectReferenceValue         = bLbl;
+        colorSo.ApplyModifiedProperties();
 
         // ── CatalogPanel (FillKitchen mode) ───────────────────────────────
         // One definition per standard model, grouped Storage → Washing → Cooking.

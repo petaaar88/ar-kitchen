@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Fridge
   code: S2
   group: 0
-  modelPrefab: {fileID: 919132149155446097, guid: 22b8eb01591042f8c9fa19acee1708a1, type: 3}
+  modelPrefab: {fileID: 9057516883678244574, guid: 1de0d3f71789496d6abf549473a00d46, type: 3}
   widthMeters: 0.6
   heightMeters: 1.8
   depthMeters: 0.6

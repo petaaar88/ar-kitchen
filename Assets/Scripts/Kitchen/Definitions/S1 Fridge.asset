@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Fridge
   code: S1
   group: 0
-  modelPrefab: {fileID: 919132149155446097, guid: a341667d8946b79ccad00f0c4a8ec3ec, type: 3}
+  modelPrefab: {fileID: 2733661685512725682, guid: 0fdfc2ccb5ae09dbd905eddf39875fe6, type: 3}
   widthMeters: 0.6
   heightMeters: 0.9
   depthMeters: 0.6

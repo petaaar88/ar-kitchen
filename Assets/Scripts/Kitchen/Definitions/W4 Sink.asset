@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Sink
   code: W4
   group: 1
-  modelPrefab: {fileID: 919132149155446097, guid: 59360d2ecc9949bf7ae1c98dd1bbe849, type: 3}
+  modelPrefab: {fileID: 4842632174016784541, guid: 8f139e99487d4be7fae31bbf815ed430, type: 3}
   widthMeters: 1.2
   heightMeters: 0.9
   depthMeters: 0.6

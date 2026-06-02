@@ -16,6 +16,7 @@ public class KitchenUI : MonoBehaviour
     [SerializeField] Button placementButton;
     [SerializeField] Button rotationButton;
     [SerializeField] Button fillButton;
+    [SerializeField] Button colorButton;
 
     void Awake()
     {
@@ -29,6 +30,7 @@ public class KitchenUI : MonoBehaviour
         placementButton.onClick.AddListener(() => stateManager.SetMode(VoxelEditMode.Placement));
         rotationButton.onClick.AddListener(() => stateManager.SetMode(VoxelEditMode.Rotation));
         fillButton.onClick.AddListener(() => stateManager.SetMode(VoxelEditMode.FillKitchen));
+        colorButton.onClick.AddListener(() => stateManager.SetMode(VoxelEditMode.Color));
 
         stateManager.OnVoxelPlaced  += OnVoxelPlaced;
         stateManager.OnEditingChanged += OnEditingChanged;

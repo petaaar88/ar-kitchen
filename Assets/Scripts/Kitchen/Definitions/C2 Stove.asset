@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Stove
   code: C2
   group: 2
-  modelPrefab: {fileID: 919132149155446097, guid: 4107d37f757fafba495a8938bc918b3a, type: 3}
+  modelPrefab: {fileID: 4742988937831868661, guid: edbedba2ddf4b56e6ab80e821e65c185, type: 3}
   widthMeters: 0.6
   heightMeters: 0.9
   depthMeters: 0.6
