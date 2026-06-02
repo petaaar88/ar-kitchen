@@ -178,16 +178,21 @@ public static class UISceneSetup
         rotSo.ApplyModifiedProperties();
 
         // ── CatalogPanel (FillKitchen mode) ───────────────────────────────
-        var defs = new[]
+        // One definition per standard model, grouped Storage → Washing → Cooking.
+        var defPaths = new[]
         {
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Fridge.asset"),
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Stove.asset"),
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Sink.asset"),
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Counter.asset"),
+            "S1 Fridge", "S2 Fridge", "S3 Fridge", "S4 Fridge",
+            "W1 Sink", "W2 Sink", "W3 Sink", "W4 Sink",
+            "C1 Stove", "C2 Stove", "C3 Stove",
         };
+        var defs = new KitchenElementDefinition[defPaths.Length];
         bool defsOk = true;
-        for (int i = 0; i < defs.Length; i++)
-            if (defs[i] == null) { Debug.LogWarning($"[UISceneSetup] Missing kitchen element definition #{i}. Run 'Create Default Kitchen Definitions' first."); defsOk = false; }
+        for (int i = 0; i < defPaths.Length; i++)
+        {
+            defs[i] = AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>(
+                $"Assets/Scripts/Kitchen/Definitions/{defPaths[i]}.asset");
+            if (defs[i] == null) { Debug.LogWarning($"[UISceneSetup] Missing definition '{defPaths[i]}'. Run 'Create Default Kitchen Definitions' first."); defsOk = false; }
+        }
 
         var catalogPanel = CreateOrFind("CatalogPanel", canvas.transform);
         {
@@ -195,36 +200,53 @@ public static class UISceneSetup
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot     = new Vector2(0.5f, 0f);
-            rt.offsetMin = new Vector2(20f,  210f);
-            rt.offsetMax = new Vector2(-20f, 370f);
+            rt.offsetMin = new Vector2(10f,  210f);
+            rt.offsetMax = new Vector2(-10f, 590f);
 
-            var hlg = catalogPanel.GetComponent<HorizontalLayoutGroup>() ?? catalogPanel.AddComponent<HorizontalLayoutGroup>();
-            hlg.childAlignment         = TextAnchor.MiddleCenter;
-            hlg.spacing                = 20f;
-            hlg.childForceExpandWidth  = false;
-            hlg.childForceExpandHeight = false;
+            // 11 models fit a 4-column grid (3 rows). No scrolling needed.
+            var hlg = catalogPanel.GetComponent<HorizontalLayoutGroup>();
+            if (hlg != null) Object.DestroyImmediate(hlg);
+            var grid = catalogPanel.GetComponent<GridLayoutGroup>() ?? catalogPanel.AddComponent<GridLayoutGroup>();
+            grid.cellSize       = new Vector2(246f, 108f);
+            grid.spacing        = new Vector2(14f, 14f);
+            grid.padding        = new RectOffset(10, 10, 10, 10);
+            grid.startCorner    = GridLayoutGroup.Corner.UpperLeft;
+            grid.startAxis      = GridLayoutGroup.Axis.Horizontal;
+            grid.childAlignment = TextAnchor.UpperCenter;
+            grid.constraint     = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 4;
             catalogPanel.SetActive(false);
         }
 
-        var catalogButtons = new Button[4];
-        var catalogLabels  = new TextMeshProUGUI[4];
-        for (int i = 0; i < 4; i++)
+        // Clear old buttons so re-runs (incl. the legacy 4-button strip) rebuild cleanly.
+        for (int i = catalogPanel.transform.childCount - 1; i >= 0; i--)
+            Object.DestroyImmediate(catalogPanel.transform.GetChild(i).gameObject);
+
+        var catalogButtons = new Button[defs.Length];
+        var catalogLabels  = new TextMeshProUGUI[defs.Length];
+        for (int i = 0; i < defs.Length; i++)
         {
-            string label = defsOk ? defs[i].DisplayName : $"Slot {i}";
-            var btn = CreateButton($"CatalogButton_{label}", label, catalogPanel.transform, 230f, 140f, 32f);
+            string title = defsOk ? $"{defs[i].Code} {defs[i].DisplayName}" : $"Slot {i}";
+            var btn = CreateButton($"CatalogButton_{(defsOk ? defs[i].Code : i.ToString())}", title, catalogPanel.transform, 246f, 108f, 26f);
+            // Tint by group so Storage/Washing/Cooking read as distinct bands.
+            if (defsOk)
+            {
+                var c = defs[i].Color;
+                btn.GetComponent<Image>().color = new Color(c.r * 0.5f, c.g * 0.5f, c.b * 0.5f, 0.9f);
+            }
             catalogButtons[i] = btn;
             catalogLabels[i]  = btn.GetComponentInChildren<TextMeshProUGUI>();
         }
 
-        // RemainingLabel — left portion of row at y 380..460
+        // RemainingLabel — left portion of row above the grid (y 600..680)
         var remainingGO = CreateOrFind("RemainingLabel", canvas.transform);
         {
             var rt       = remainingGO.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot     = new Vector2(0.5f, 0f);
-            rt.offsetMin = new Vector2(20f,  380f);
-            rt.offsetMax = new Vector2(-320f, 460f);
+            rt.offsetMin = new Vector2(20f,  600f);
+            rt.offsetMax = new Vector2(-320f, 680f);
             remainingGO.SetActive(false);
         }
         var remainingTmp = remainingGO.GetComponent<TextMeshProUGUI>() ?? remainingGO.AddComponent<TextMeshProUGUI>();
@@ -240,20 +262,20 @@ public static class UISceneSetup
             rt.anchorMin        = new Vector2(1f, 0f);
             rt.anchorMax        = new Vector2(1f, 0f);
             rt.pivot            = new Vector2(1f, 0f);
-            rt.anchoredPosition = new Vector2(-20f, 390f);
+            rt.anchoredPosition = new Vector2(-20f, 610f);
             rt.sizeDelta        = new Vector2(280f, 80f);
             removeBtn.gameObject.SetActive(false);
         }
 
-        // Toast — warning bar above the remaining label (y 480..580)
+        // Toast — warning bar above the readout row (y 700..800)
         var toastGO = CreateOrFind("KitchenToast", canvas.transform);
         {
             var rt       = toastGO.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot     = new Vector2(0.5f, 0f);
-            rt.offsetMin = new Vector2(40f,  480f);
-            rt.offsetMax = new Vector2(-40f, 580f);
+            rt.offsetMin = new Vector2(40f,  700f);
+            rt.offsetMax = new Vector2(-40f, 800f);
             toastGO.SetActive(false);
         }
         var toastBg = toastGO.GetComponent<Image>() ?? toastGO.AddComponent<Image>();
@@ -308,8 +330,8 @@ public static class UISceneSetup
         catSo.FindProperty("mandatoryBanner").objectReferenceValue      = bannerGO;
         catSo.FindProperty("mandatoryBannerLabel").objectReferenceValue = bannerTmp;
         var entriesProp = catSo.FindProperty("entries");
-        entriesProp.arraySize = 4;
-        for (int i = 0; i < 4; i++)
+        entriesProp.arraySize = defs.Length;
+        for (int i = 0; i < defs.Length; i++)
         {
             var elem = entriesProp.GetArrayElementAtIndex(i);
             elem.FindPropertyRelative("definition").objectReferenceValue = defs[i];

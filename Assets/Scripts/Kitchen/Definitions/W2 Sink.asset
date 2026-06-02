@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1028ac078672aeb1cb82057775404331, type: 3}
+  m_Name: W2 Sink
+  m_EditorClassIdentifier: Assembly-CSharp::KitchenElementDefinition
+  displayName: Sink
+  code: W2
+  group: 1
+  modelPrefab: {fileID: 919132149155446097, guid: 039e5d4160cfa1b0ebd5ac4fbfdca744, type: 3}
+  widthMeters: 0.6
+  heightMeters: 0.9
+  depthMeters: 0.6
+  color: {r: 0.7, g: 0.75, b: 0.8, a: 1}
+  isMandatory: 0
+  isFiller: 0

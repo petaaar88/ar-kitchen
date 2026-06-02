@@ -162,8 +162,10 @@ public class KitchenCatalogUI : MonoBehaviour
 
     static string FormatLabel(KitchenElementDefinition def)
     {
-        var hex = ColorUtility.ToHtmlStringRGB(def.Color);
-        int widthCm = Mathf.RoundToInt(def.WidthMeters * 100f);
-        return $"<color=#{hex}>■</color>\n{def.DisplayName}\n<size=70%>{widthCm} cm</size>";
+        int w = Mathf.RoundToInt(def.WidthMeters * 100f);
+        int h = Mathf.RoundToInt(def.HeightMeters * 100f);
+        int d = Mathf.RoundToInt(def.DepthMeters * 100f);
+        string title = string.IsNullOrEmpty(def.Code) ? def.DisplayName : $"{def.Code} {def.DisplayName}";
+        return $"{title}\n<size=70%>{w}×{h}×{d}</size>";
     }
 }
