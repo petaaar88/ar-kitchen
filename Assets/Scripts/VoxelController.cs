@@ -30,6 +30,18 @@ public class VoxelController : MonoBehaviour
     public void Rotate(float degrees) =>
         transform.Rotate(0f, degrees, 0f, Space.World);
 
+    /// <summary>
+    /// Shows or hides the voxel's own marker visuals (fill + wireframe edges)
+    /// without touching placed kitchen elements, which are separate children.
+    /// </summary>
+    public void SetVisible(bool visible)
+    {
+        if (fill != null) fill.gameObject.SetActive(visible);
+        foreach (Transform child in transform)
+            if (child.name.StartsWith("Edge_"))
+                child.gameObject.SetActive(visible);
+    }
+
     void UpdateGeometry()
     {
         float w = _width, h = _height, d = _depth;

@@ -53,6 +53,15 @@ public static class UISceneSetup
         planeBtnRt.anchoredPosition = new Vector2(-20f, -20f);
         planeBtnRt.sizeDelta        = new Vector2(110f, 110f);
 
+        // ── VoxelToggleButton (left of the Planes button) ─────────────────
+        var voxelBtn   = CreateButton("VoxelToggleButton", "Voxel", canvas.transform, 110f, 110f, 24f);
+        var voxelBtnRt = voxelBtn.GetComponent<RectTransform>();
+        voxelBtnRt.anchorMin        = new Vector2(1f, 1f);
+        voxelBtnRt.anchorMax        = new Vector2(1f, 1f);
+        voxelBtnRt.pivot            = new Vector2(1f, 1f);
+        voxelBtnRt.anchoredPosition = new Vector2(-150f, -20f); // 20 + 110 + 20 left of Planes
+        voxelBtnRt.sizeDelta        = new Vector2(110f, 110f);
+
         // ── EditPanel (bottom bar) ────────────────────────────────────────
         var editPanel = CreateOrFind("EditPanel", canvas.transform);
         {
@@ -350,6 +359,13 @@ public static class UISceneSetup
         ptSo.FindProperty("planeManager").objectReferenceValue = planeManager;
         ptSo.FindProperty("toggleButton").objectReferenceValue = planeBtn;
         ptSo.ApplyModifiedProperties();
+
+        // ── VoxelToggleUI (on Canvas) ─────────────────────────────────────
+        var vtUI = canvas.GetComponent<VoxelToggleUI>() ?? canvas.gameObject.AddComponent<VoxelToggleUI>();
+        var vtSo = new SerializedObject(vtUI);
+        vtSo.FindProperty("stateManager").objectReferenceValue = xrOrigin.GetComponent<VoxelStateManager>();
+        vtSo.FindProperty("toggleButton").objectReferenceValue = voxelBtn;
+        vtSo.ApplyModifiedProperties();
 
         // Mark every modified object dirty so Unity serializes all changes
         foreach (var go in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
