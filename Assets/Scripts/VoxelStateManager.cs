@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum VoxelEditMode { None, Scale, Placement, Rotation, FillKitchen }
+public enum VoxelEditMode { None, Scale, Placement, Rotation, FillKitchen, Color }
 
 public class VoxelStateManager : MonoBehaviour
 {

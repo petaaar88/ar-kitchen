@@ -10,12 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1028ac078672aeb1cb82057775404331, type: 3}
-  m_Name: Stove
+  m_Name: W1 Sink
   m_EditorClassIdentifier: Assembly-CSharp::KitchenElementDefinition
-  displayName: Stove
-  widthMeters: 0.6
-  heightMeters: 0.85
+  displayName: Sink
+  code: W1
+  group: 1
+  modelPrefab: {fileID: 5113614196074879933, guid: e25a525bec5cbf060a817ba6e06b6284, type: 3}
+  widthMeters: 0.3
+  heightMeters: 0.9
   depthMeters: 0.6
-  color: {r: 0.95, g: 0.45, b: 0.3, a: 1}
-  isMandatory: 1
+  color: {r: 0.7, g: 0.75, b: 0.8, a: 1}
+  isMandatory: 0
   isFiller: 0

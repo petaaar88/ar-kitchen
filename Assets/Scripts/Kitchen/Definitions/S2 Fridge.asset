@@ -10,12 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1028ac078672aeb1cb82057775404331, type: 3}
-  m_Name: Fridge
+  m_Name: S2 Fridge
   m_EditorClassIdentifier: Assembly-CSharp::KitchenElementDefinition
   displayName: Fridge
+  code: S2
+  group: 0
+  modelPrefab: {fileID: 9057516883678244574, guid: 1de0d3f71789496d6abf549473a00d46, type: 3}
   widthMeters: 0.6
   heightMeters: 1.8
-  depthMeters: 0.65
+  depthMeters: 0.6
   color: {r: 0.55, g: 0.78, b: 0.95, a: 1}
-  isMandatory: 1
+  isMandatory: 0
   isFiller: 0

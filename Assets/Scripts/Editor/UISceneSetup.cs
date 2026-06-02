@@ -53,6 +53,15 @@ public static class UISceneSetup
         planeBtnRt.anchoredPosition = new Vector2(-20f, -20f);
         planeBtnRt.sizeDelta        = new Vector2(110f, 110f);
 
+        // ── VoxelToggleButton (left of the Planes button) ─────────────────
+        var voxelBtn   = CreateButton("VoxelToggleButton", "Voxel", canvas.transform, 110f, 110f, 24f);
+        var voxelBtnRt = voxelBtn.GetComponent<RectTransform>();
+        voxelBtnRt.anchorMin        = new Vector2(1f, 1f);
+        voxelBtnRt.anchorMax        = new Vector2(1f, 1f);
+        voxelBtnRt.pivot            = new Vector2(1f, 1f);
+        voxelBtnRt.anchoredPosition = new Vector2(-150f, -20f); // 20 + 110 + 20 left of Planes
+        voxelBtnRt.sizeDelta        = new Vector2(110f, 110f);
+
         // ── EditPanel (bottom bar) ────────────────────────────────────────
         var editPanel = CreateOrFind("EditPanel", canvas.transform);
         {
@@ -84,16 +93,17 @@ public static class UISceneSetup
             subHlg.childForceExpandWidth  = false;
             subHlg.childForceExpandHeight = false;
 
-            // 4 × 200 + 3 × 20 spacing = 860
+            // 5 × 150 + 4 × 20 spacing = 830
             var subRt     = subPanel.GetComponent<RectTransform>();
-            subRt.sizeDelta = new Vector2(860f, 100f);
+            subRt.sizeDelta = new Vector2(830f, 100f);
             subPanel.SetActive(false);
         }
 
-        var scaleBtn     = CreateButton("ScaleButton",     "Scale",  subPanel.transform, 200f, 100f);
-        var placementBtn = CreateButton("PlacementButton", "Move",   subPanel.transform, 200f, 100f);
-        var rotationBtn  = CreateButton("RotationButton",  "Rotate", subPanel.transform, 200f, 100f);
-        var fillBtn      = CreateButton("FillButton",      "Fill",   subPanel.transform, 200f, 100f);
+        var scaleBtn     = CreateButton("ScaleButton",     "Scale",  subPanel.transform, 150f, 100f, 30f);
+        var placementBtn = CreateButton("PlacementButton", "Move",   subPanel.transform, 150f, 100f, 30f);
+        var rotationBtn  = CreateButton("RotationButton",  "Rotate", subPanel.transform, 150f, 100f, 30f);
+        var fillBtn      = CreateButton("FillButton",      "Fill",   subPanel.transform, 150f, 100f, 30f);
+        var colorBtn     = CreateButton("ColorButton",     "Color",  subPanel.transform, 150f, 100f, 30f);
 
         // ── KitchenUI (on Canvas) ─────────────────────────────────────────
         var ui = canvas.GetComponent<KitchenUI>() ?? canvas.gameObject.AddComponent<KitchenUI>();
@@ -107,6 +117,7 @@ public static class UISceneSetup
         uiSo.FindProperty("placementButton").objectReferenceValue = placementBtn;
         uiSo.FindProperty("rotationButton").objectReferenceValue  = rotationBtn;
         uiSo.FindProperty("fillButton").objectReferenceValue      = fillBtn;
+        uiSo.FindProperty("colorButton").objectReferenceValue     = colorBtn;
         uiSo.ApplyModifiedProperties();
 
         // ── ScalePanel ────────────────────────────────────────────────────
@@ -177,17 +188,89 @@ public static class UISceneSetup
         rotSo.FindProperty("rotateRightButton").objectReferenceValue = rotRightBtn;
         rotSo.ApplyModifiedProperties();
 
-        // ── CatalogPanel (FillKitchen mode) ───────────────────────────────
-        var defs = new[]
+        // ── ColorPanel (Color mode) ───────────────────────────────────────
+        // Selector row (Main/Secondary + preview swatch) on top, then R/G/B
+        // slider rows. Same stretch-anchored row scheme as ScalePanel.
+        var colorPanel = CreateOrFind("ColorPanel", canvas.transform);
         {
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Fridge.asset"),
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Stove.asset"),
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Sink.asset"),
-            AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>("Assets/Scripts/Kitchen/Definitions/Counter.asset"),
+            var rt       = colorPanel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  210f);
+            rt.offsetMax = new Vector2(-20f, 680f);
+
+            var vlg = colorPanel.GetComponent<VerticalLayoutGroup>();
+            if (vlg != null) Object.DestroyImmediate(vlg);
+            colorPanel.SetActive(false);
+        }
+
+        // Selector row (top): Main / Secondary buttons + a colour preview swatch
+        var selectorRow = CreateOrFind("ColorSelectorRow", colorPanel.transform);
+        {
+            var rt       = selectorRow.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  340f);
+            rt.offsetMax = new Vector2(-20f, 440f);
+
+            var hlg = selectorRow.GetComponent<HorizontalLayoutGroup>() ?? selectorRow.AddComponent<HorizontalLayoutGroup>();
+            hlg.childAlignment         = TextAnchor.MiddleCenter;
+            hlg.spacing                = 16f;
+            hlg.childForceExpandWidth  = false;
+            hlg.childForceExpandHeight = false;
+            hlg.padding                = new RectOffset(10, 10, 0, 0);
+        }
+        var mainColorBtn      = CreateButton("MainColorButton",      "Main",      selectorRow.transform, 320f, 90f, 32f);
+        var secondaryColorBtn = CreateButton("SecondaryColorButton", "Secondary", selectorRow.transform, 320f, 90f, 32f);
+        var previewGO = CreateOrFind("ColorPreview", selectorRow.transform);
+        previewGO.GetComponent<RectTransform>().sizeDelta = new Vector2(120f, 90f);
+        var previewImg = previewGO.GetComponent<Image>() ?? previewGO.AddComponent<Image>();
+
+        TextMeshProUGUI rLbl, gLbl, bLbl;
+        var rSlider = CreateSliderRow("ColorRRow", "R 0.00", colorPanel.transform, out rLbl, 230f, 330f);
+        var gSlider = CreateSliderRow("ColorGRow", "G 0.00", colorPanel.transform, out gLbl, 120f, 220f);
+        var bSlider = CreateSliderRow("ColorBRow", "B 0.00", colorPanel.transform, out bLbl,  10f, 110f);
+
+        var mainMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/KitchenMainMaterial.mat");
+        var secMat  = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/KitchenSecondaryMaterial.mat");
+        if (mainMat == null || secMat == null)
+            Debug.LogWarning("[UISceneSetup] Kitchen materials not found under Assets/Materials — wire them manually.");
+
+        var colorUI = canvas.GetComponent<MaterialColorUI>() ?? canvas.gameObject.AddComponent<MaterialColorUI>();
+        var colorSo = new SerializedObject(colorUI);
+        colorSo.FindProperty("stateManager").objectReferenceValue      = xrOrigin.GetComponent<VoxelStateManager>();
+        colorSo.FindProperty("colorPanel").objectReferenceValue        = colorPanel;
+        colorSo.FindProperty("mainMaterial").objectReferenceValue      = mainMat;
+        colorSo.FindProperty("secondaryMaterial").objectReferenceValue = secMat;
+        colorSo.FindProperty("mainButton").objectReferenceValue        = mainColorBtn;
+        colorSo.FindProperty("secondaryButton").objectReferenceValue   = secondaryColorBtn;
+        colorSo.FindProperty("previewSwatch").objectReferenceValue     = previewImg;
+        colorSo.FindProperty("redSlider").objectReferenceValue         = rSlider;
+        colorSo.FindProperty("greenSlider").objectReferenceValue       = gSlider;
+        colorSo.FindProperty("blueSlider").objectReferenceValue        = bSlider;
+        colorSo.FindProperty("redLabel").objectReferenceValue          = rLbl;
+        colorSo.FindProperty("greenLabel").objectReferenceValue        = gLbl;
+        colorSo.FindProperty("blueLabel").objectReferenceValue         = bLbl;
+        colorSo.ApplyModifiedProperties();
+
+        // ── CatalogPanel (FillKitchen mode) ───────────────────────────────
+        // One definition per standard model, grouped Storage → Washing → Cooking.
+        var defPaths = new[]
+        {
+            "S1 Fridge", "S2 Fridge", "S3 Fridge", "S4 Fridge",
+            "W1 Sink", "W2 Sink", "W3 Sink", "W4 Sink",
+            "C1 Stove", "C2 Stove", "C3 Stove",
         };
+        var defs = new KitchenElementDefinition[defPaths.Length];
         bool defsOk = true;
-        for (int i = 0; i < defs.Length; i++)
-            if (defs[i] == null) { Debug.LogWarning($"[UISceneSetup] Missing kitchen element definition #{i}. Run 'Create Default Kitchen Definitions' first."); defsOk = false; }
+        for (int i = 0; i < defPaths.Length; i++)
+        {
+            defs[i] = AssetDatabase.LoadAssetAtPath<KitchenElementDefinition>(
+                $"Assets/Scripts/Kitchen/Definitions/{defPaths[i]}.asset");
+            if (defs[i] == null) { Debug.LogWarning($"[UISceneSetup] Missing definition '{defPaths[i]}'. Run 'Create Default Kitchen Definitions' first."); defsOk = false; }
+        }
 
         var catalogPanel = CreateOrFind("CatalogPanel", canvas.transform);
         {
@@ -195,36 +278,53 @@ public static class UISceneSetup
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot     = new Vector2(0.5f, 0f);
-            rt.offsetMin = new Vector2(20f,  210f);
-            rt.offsetMax = new Vector2(-20f, 370f);
+            rt.offsetMin = new Vector2(10f,  210f);
+            rt.offsetMax = new Vector2(-10f, 590f);
 
-            var hlg = catalogPanel.GetComponent<HorizontalLayoutGroup>() ?? catalogPanel.AddComponent<HorizontalLayoutGroup>();
-            hlg.childAlignment         = TextAnchor.MiddleCenter;
-            hlg.spacing                = 20f;
-            hlg.childForceExpandWidth  = false;
-            hlg.childForceExpandHeight = false;
+            // 11 models fit a 4-column grid (3 rows). No scrolling needed.
+            var hlg = catalogPanel.GetComponent<HorizontalLayoutGroup>();
+            if (hlg != null) Object.DestroyImmediate(hlg);
+            var grid = catalogPanel.GetComponent<GridLayoutGroup>() ?? catalogPanel.AddComponent<GridLayoutGroup>();
+            grid.cellSize       = new Vector2(246f, 108f);
+            grid.spacing        = new Vector2(14f, 14f);
+            grid.padding        = new RectOffset(10, 10, 10, 10);
+            grid.startCorner    = GridLayoutGroup.Corner.UpperLeft;
+            grid.startAxis      = GridLayoutGroup.Axis.Horizontal;
+            grid.childAlignment = TextAnchor.UpperCenter;
+            grid.constraint     = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 4;
             catalogPanel.SetActive(false);
         }
 
-        var catalogButtons = new Button[4];
-        var catalogLabels  = new TextMeshProUGUI[4];
-        for (int i = 0; i < 4; i++)
+        // Clear old buttons so re-runs (incl. the legacy 4-button strip) rebuild cleanly.
+        for (int i = catalogPanel.transform.childCount - 1; i >= 0; i--)
+            Object.DestroyImmediate(catalogPanel.transform.GetChild(i).gameObject);
+
+        var catalogButtons = new Button[defs.Length];
+        var catalogLabels  = new TextMeshProUGUI[defs.Length];
+        for (int i = 0; i < defs.Length; i++)
         {
-            string label = defsOk ? defs[i].DisplayName : $"Slot {i}";
-            var btn = CreateButton($"CatalogButton_{label}", label, catalogPanel.transform, 230f, 140f, 32f);
+            string title = defsOk ? $"{defs[i].Code} {defs[i].DisplayName}" : $"Slot {i}";
+            var btn = CreateButton($"CatalogButton_{(defsOk ? defs[i].Code : i.ToString())}", title, catalogPanel.transform, 246f, 108f, 26f);
+            // Tint by group so Storage/Washing/Cooking read as distinct bands.
+            if (defsOk)
+            {
+                var c = defs[i].Color;
+                btn.GetComponent<Image>().color = new Color(c.r * 0.5f, c.g * 0.5f, c.b * 0.5f, 0.9f);
+            }
             catalogButtons[i] = btn;
             catalogLabels[i]  = btn.GetComponentInChildren<TextMeshProUGUI>();
         }
 
-        // RemainingLabel — left portion of row at y 380..460
+        // RemainingLabel — left portion of row above the grid (y 600..680)
         var remainingGO = CreateOrFind("RemainingLabel", canvas.transform);
         {
             var rt       = remainingGO.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot     = new Vector2(0.5f, 0f);
-            rt.offsetMin = new Vector2(20f,  380f);
-            rt.offsetMax = new Vector2(-320f, 460f);
+            rt.offsetMin = new Vector2(20f,  600f);
+            rt.offsetMax = new Vector2(-320f, 680f);
             remainingGO.SetActive(false);
         }
         var remainingTmp = remainingGO.GetComponent<TextMeshProUGUI>() ?? remainingGO.AddComponent<TextMeshProUGUI>();
@@ -240,20 +340,20 @@ public static class UISceneSetup
             rt.anchorMin        = new Vector2(1f, 0f);
             rt.anchorMax        = new Vector2(1f, 0f);
             rt.pivot            = new Vector2(1f, 0f);
-            rt.anchoredPosition = new Vector2(-20f, 390f);
+            rt.anchoredPosition = new Vector2(-20f, 610f);
             rt.sizeDelta        = new Vector2(280f, 80f);
             removeBtn.gameObject.SetActive(false);
         }
 
-        // Toast — warning bar above the remaining label (y 480..580)
+        // Toast — warning bar above the readout row (y 700..800)
         var toastGO = CreateOrFind("KitchenToast", canvas.transform);
         {
             var rt       = toastGO.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot     = new Vector2(0.5f, 0f);
-            rt.offsetMin = new Vector2(40f,  480f);
-            rt.offsetMax = new Vector2(-40f, 580f);
+            rt.offsetMin = new Vector2(40f,  700f);
+            rt.offsetMax = new Vector2(-40f, 800f);
             toastGO.SetActive(false);
         }
         var toastBg = toastGO.GetComponent<Image>() ?? toastGO.AddComponent<Image>();
@@ -308,8 +408,8 @@ public static class UISceneSetup
         catSo.FindProperty("mandatoryBanner").objectReferenceValue      = bannerGO;
         catSo.FindProperty("mandatoryBannerLabel").objectReferenceValue = bannerTmp;
         var entriesProp = catSo.FindProperty("entries");
-        entriesProp.arraySize = 4;
-        for (int i = 0; i < 4; i++)
+        entriesProp.arraySize = defs.Length;
+        for (int i = 0; i < defs.Length; i++)
         {
             var elem = entriesProp.GetArrayElementAtIndex(i);
             elem.FindPropertyRelative("definition").objectReferenceValue = defs[i];
@@ -328,6 +428,13 @@ public static class UISceneSetup
         ptSo.FindProperty("planeManager").objectReferenceValue = planeManager;
         ptSo.FindProperty("toggleButton").objectReferenceValue = planeBtn;
         ptSo.ApplyModifiedProperties();
+
+        // ── VoxelToggleUI (on Canvas) ─────────────────────────────────────
+        var vtUI = canvas.GetComponent<VoxelToggleUI>() ?? canvas.gameObject.AddComponent<VoxelToggleUI>();
+        var vtSo = new SerializedObject(vtUI);
+        vtSo.FindProperty("stateManager").objectReferenceValue = xrOrigin.GetComponent<VoxelStateManager>();
+        vtSo.FindProperty("toggleButton").objectReferenceValue = voxelBtn;
+        vtSo.ApplyModifiedProperties();
 
         // Mark every modified object dirty so Unity serializes all changes
         foreach (var go in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
