@@ -12,12 +12,23 @@ public class KitchenElementView : MonoBehaviour
 
     KitchenElementDefinition _definition;
     GameObject _modelInstance;
+    int _variantIndex;
 
     public KitchenElementDefinition Definition => _definition;
+    public int CurrentVariantIndex => _variantIndex;
 
     public void Apply(KitchenElementDefinition def)
     {
         _definition = def;
+        ApplyVariant(0);
+    }
+
+    // Swaps the visible model to the given variant. Variants share the footprint,
+    // so the layout (position/rotation set by KitchenLayoutController) is unaffected.
+    public void ApplyVariant(int index)
+    {
+        if (_definition == null) return;
+        _variantIndex = Mathf.Clamp(index, 0, _definition.VariantCount - 1);
 
         if (_modelInstance != null)
         {
@@ -25,24 +36,33 @@ public class KitchenElementView : MonoBehaviour
             _modelInstance = null;
         }
 
-        if (def.ModelPrefab != null)
+        var prefab = _definition.GetVariant(_variantIndex);
+        if (prefab == null) return;
+
+        // SetParent(..., false) keeps the FBX's imported local rotation/scale
+        // (Blender's Z-up→Y-up axis correction).
+        _modelInstance = Instantiate(prefab);
+        var t = _modelInstance.transform;
+        t.SetParent(transform, false);
+
+        // Models are authored facing the wall; spin them about the vertical
+        // axis so the front faces the room. Applied before measuring so the
+        // footprint AABB still lands in [0,w] x [0,h] x [0,d].
+        t.localRotation = Quaternion.Euler(0f, modelYawOffset, 0f) * t.localRotation;
+        t.localPosition = Vector3.zero;
+
+        // Drop the model's AABB min corner onto the view origin so the model
+        // occupies [0,w] x [0,h] x [0,d] in local space, like the old cube did.
+        if (TryGetLocalBounds(t, out var bounds))
         {
-            // SetParent(..., false) keeps the FBX's imported local rotation/scale
-            // (Blender's Z-up→Y-up axis correction).
-            _modelInstance = Instantiate(def.ModelPrefab);
-            var t = _modelInstance.transform;
-            t.SetParent(transform, false);
+            t.localPosition = -bounds.min;
 
-            // Models are authored facing the wall; spin them about the vertical
-            // axis so the front faces the room. Applied before measuring so the
-            // footprint AABB still lands in [0,w] x [0,h] x [0,d].
-            t.localRotation = Quaternion.Euler(0f, modelYawOffset, 0f) * t.localRotation;
-            t.localPosition = Vector3.zero;
-
-            // Drop the model's AABB min corner onto the view origin so the model
-            // occupies [0,w] x [0,h] x [0,d] in local space, like the old cube did.
-            if (TryGetLocalBounds(t, out var bounds))
-                t.localPosition = -bounds.min;
+            // Tap target for variant selection: a box wrapping the model's
+            // footprint in this view's local space (now anchored at the origin).
+            var box = GetComponent<BoxCollider>();
+            if (box == null) box = gameObject.AddComponent<BoxCollider>();
+            box.center = bounds.size * 0.5f;
+            box.size = bounds.size;
         }
     }
 

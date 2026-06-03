@@ -436,6 +436,45 @@ public static class UISceneSetup
         vtSo.FindProperty("toggleButton").objectReferenceValue = voxelBtn;
         vtSo.ApplyModifiedProperties();
 
+        // ── VariantPanel (FillKitchen mode: tap a placed element) ─────────
+        // Horizontal strip of variant buttons, shown only while an element is
+        // selected. Sits above the catalog readout row so it doesn't overlap.
+        var variantPanel = CreateOrFind("VariantPanel", canvas.transform);
+        {
+            var rt       = variantPanel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot     = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(20f,  810f);
+            rt.offsetMax = new Vector2(-20f, 940f);
+
+            var bg = variantPanel.GetComponent<Image>() ?? variantPanel.AddComponent<Image>();
+            bg.color = new Color(0.1f, 0.1f, 0.1f, 0.85f);
+
+            var hlg = variantPanel.GetComponent<HorizontalLayoutGroup>() ?? variantPanel.AddComponent<HorizontalLayoutGroup>();
+            hlg.childAlignment         = TextAnchor.MiddleCenter;
+            hlg.spacing                = 16f;
+            hlg.childControlWidth       = false;
+            hlg.childControlHeight      = false;
+            hlg.childForceExpandWidth  = false;
+            hlg.childForceExpandHeight = false;
+            hlg.padding                = new RectOffset(16, 16, 14, 14);
+            variantPanel.SetActive(false);
+        }
+
+        // Template cloned once per variant at runtime; kept inactive in the scene.
+        var variantTemplate = CreateButton("VariantButtonTemplate", "Variant", variantPanel.transform, 240f, 100f, 28f);
+        variantTemplate.gameObject.SetActive(false);
+
+        var variantUI = canvas.GetComponent<ElementVariantUI>() ?? canvas.gameObject.AddComponent<ElementVariantUI>();
+        var variantSo = new SerializedObject(variantUI);
+        variantSo.FindProperty("stateManager").objectReferenceValue    = xrOrigin.GetComponent<VoxelStateManager>();
+        variantSo.FindProperty("arCamera").objectReferenceValue        = xrOrigin.GetComponentInChildren<Camera>();
+        variantSo.FindProperty("variantPanel").objectReferenceValue    = variantPanel;
+        variantSo.FindProperty("buttonContainer").objectReferenceValue = variantPanel.transform;
+        variantSo.FindProperty("buttonTemplate").objectReferenceValue  = variantTemplate;
+        variantSo.ApplyModifiedProperties();
+
         // Mark every modified object dirty so Unity serializes all changes
         foreach (var go in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             EditorUtility.SetDirty(go);
