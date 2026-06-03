@@ -16,6 +16,8 @@ MonoBehaviour:
   code: S4
   group: 0
   modelPrefab: {fileID: 7967677087187606481, guid: 281ebc23d69c5dd1fb1ba22193886e51, type: 3}
+  variantPrefabs:
+  - {fileID: 9176149146492118787, guid: c4dbfe6ec92ff21db9e261fee722fd16, type: 3}
   widthMeters: 1.2
   heightMeters: 1.8
   depthMeters: 0.6
