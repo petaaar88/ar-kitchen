@@ -16,6 +16,8 @@ MonoBehaviour:
   code: C3
   group: 2
   modelPrefab: {fileID: 6015383722819062544, guid: 7c0b82d956cd57633b1314c2514002dd, type: 3}
+  variantPrefabs:
+  - {fileID: 6101599828168717165, guid: 5beb5fe1e52669b8fbc4eb08672c2d67, type: 3}
   widthMeters: 1.2
   heightMeters: 1.8
   depthMeters: 0.6
