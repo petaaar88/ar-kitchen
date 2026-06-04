@@ -11,7 +11,8 @@
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-    padding-top: 18px;
+    /* Pushed down so the pills clear front-camera punch-holes / notches. */
+    padding-top: 64px;
     padding-right: 18px;
 }
 
@@ -19,14 +20,14 @@
 .pill {
     flex-direction: row;
     align-items: center;
-    height: 46px;
+    height: 54px;
     margin-left: 10px;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
-    padding-left: 18px;
-    padding-right: 20px;
-    border-radius: 23px;
+    padding-left: 22px;
+    padding-right: 24px;
+    border-radius: 27px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.14);
     background-color: rgba(22, 30, 46, 0.82);
@@ -46,14 +47,14 @@
 }
 
 .pill-icon {
-    font-size: 18px;
-    margin-right: 8px;
+    font-size: 24px;
+    margin-right: 9px;
     color: rgba(190, 200, 220, 0.85);
     -unity-text-align: middle-center;
 }
 
 .pill-text {
-    font-size: 17px;
+    font-size: 23px;
     -unity-font-style: bold;
     color: rgba(205, 214, 232, 0.95);
 }
@@ -76,24 +77,24 @@
     flex-grow: 1;
     justify-content: center;
     background-color: rgba(22, 30, 46, 0.82);
-    border-radius: 22px;
+    border-radius: 26px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
-    padding-top: 16px;
-    padding-bottom: 16px;
-    padding-left: 22px;
-    padding-right: 22px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 26px;
+    padding-right: 26px;
 }
 
 .card-title {
-    font-size: 19px;
+    font-size: 31px;
     -unity-font-style: bold;
     color: rgb(245, 248, 255);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
 
 .card-subtitle {
-    font-size: 14px;
+    font-size: 23px;
     color: rgba(170, 180, 200, 0.9);
 }
 
@@ -105,9 +106,9 @@
     margin-top: 0;
     margin-bottom: 0;
     margin-right: 0;
-    padding-left: 26px;
-    padding-right: 28px;
-    border-radius: 22px;
+    padding-left: 30px;
+    padding-right: 32px;
+    border-radius: 26px;
     border-width: 0;
     background-color: rgb(43, 100, 245);
 }
@@ -121,14 +122,14 @@
 }
 
 .edit-icon {
-    font-size: 18px;
-    margin-right: 8px;
+    font-size: 27px;
+    margin-right: 9px;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
 }
 
 .edit-text {
-    font-size: 19px;
+    font-size: 30px;
     -unity-font-style: bold;
     color: rgb(255, 255, 255);
 }

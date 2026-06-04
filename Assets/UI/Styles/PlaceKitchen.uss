@@ -17,7 +17,7 @@
     padding-left: 28px;
     padding-right: 28px;
     color: rgb(245, 248, 255);
-    font-size: 18px;
+    font-size: 24px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     white-space: normal;

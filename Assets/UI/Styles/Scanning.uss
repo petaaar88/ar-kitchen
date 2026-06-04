@@ -107,13 +107,13 @@
 
 .scan-badge-icon {
     color: rgb(120, 180, 255);
-    font-size: 26px;
+    font-size: 30px;
     -unity-font-style: bold;
 }
 
 .scan-title {
     color: rgb(245, 248, 255);
-    font-size: 28px;
+    font-size: 32px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     margin-bottom: 6px;
@@ -121,7 +121,7 @@
 
 .scan-subtitle {
     color: rgba(182, 192, 212, 0.92);
-    font-size: 16px;
+    font-size: 20px;
     -unity-text-align: middle-center;
     white-space: normal;
     margin-bottom: 18px;
