@@ -23,17 +23,6 @@
     overflow: hidden;
 }
 
-/* Top sheen — subtle lighter band across the upper half = glossy reflection */
-.card-sheen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 55%;
-    background-color: rgba(255, 255, 255, 0.04);
-    border-top-left-radius: 28px;
-    border-top-right-radius: 28px;
-}
 
 /* Circular checkmark badge */
 .badge {
@@ -70,14 +59,6 @@
     margin-bottom: 20px;
 }
 
-/* Bright blue accent / progress line */
-.progress {
-    width: 100%;
-    height: 4px;
-    border-radius: 2px;
-    background-color: rgb(43, 110, 255);
-    margin-bottom: 22px;
-}
 
 /* Gradient-ish blue button (flat base + sheen child for gloss) */
 .button {
@@ -100,14 +81,3 @@
     background-color: rgb(34, 84, 220);
 }
 
-/* Glossy highlight on the top half of the button */
-.button-sheen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background-color: rgba(255, 255, 255, 0.10);
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-}

@@ -13,8 +13,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="scan-card" class="scan-card">
-            <ui:VisualElement name="scan-card-sheen" class="scan-card-sheen" picking-mode="Ignore" />
-            <ui:VisualElement name="scan-badge" class="scan-badge">
+<ui:VisualElement name="scan-badge" class="scan-badge">
                 <ui:Label text="⛶" class="scan-badge-icon" />
             </ui:VisualElement>
             <ui:Label text="Scanning your room" class="scan-title" />

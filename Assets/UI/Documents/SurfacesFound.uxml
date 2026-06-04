@@ -3,16 +3,12 @@
     <ui:Style src="project://database/Assets/UI/Styles/SurfacesFound.uss" />
     <ui:VisualElement name="screen" class="screen">
         <ui:VisualElement name="card" class="card">
-            <ui:VisualElement name="card-sheen" class="card-sheen" picking-mode="Ignore" />
-            <ui:VisualElement name="badge" class="badge">
+<ui:VisualElement name="badge" class="badge">
                 <ui:Label name="badge-check" text="✓" class="badge-check" />
             </ui:VisualElement>
             <ui:Label name="title" text="Surfaces found" class="title" />
             <ui:Label name="subtitle" text="Tap a blue area to drop your kitchen space" class="subtitle" />
-            <ui:VisualElement name="progress" class="progress" picking-mode="Ignore" />
-            <ui:Button name="place-button" text="Place kitchen space" class="button">
-                <ui:VisualElement name="button-sheen" class="button-sheen" picking-mode="Ignore" />
-            </ui:Button>
+<ui:Button name="place-button" text="Place kitchen space" class="button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
