@@ -12,16 +12,26 @@ public static class ARPlaneSetup
     [MenuItem("Tools/AR Kitchen/Setup AR Plane Visualization")]
     public static void SetupARPlaneVisualization()
     {
-        // ── Material ─────────────────────────────────────────────────────
+        // ── Fill material (tiled scanning dots, feathered edges) ─────────
+        // Plane mesh UVs are (vertex.x, vertex.z) in metres, so the dot
+        // texture tiles in world space — dots stay a constant real-world
+        // size regardless of plane size. _Scale 10 ≈ one dot every 0.1 m.
+        // The "AR Kitchen/Feathered Plane" shader fades the dots out near
+        // each plane edge (ARPlaneFeather feeds it the plane bounds).
+        var dotTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Textures/PlaneDots.png");
+
         const string matPath = "Assets/Materials/ARPlane.mat";
         var mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
         if (mat == null)
         {
-            mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-            mat.SetFloat("_Surface", 1f);
-            mat.SetFloat("_Blend", 0f);
-            mat.SetFloat("_ZWrite", 0f);
-            mat.SetColor("_BaseColor", new Color(0.1f, 0.6f, 1f, 0.35f));
+            mat = new Material(Shader.Find("AR Kitchen/Feathered Plane"));
+            mat.SetColor("_BaseColor", new Color(1f, 1f, 1f, 0.9f));
+            mat.SetFloat("_FeatherWidth", 0.25f);
+            if (dotTex != null)
+            {
+                mat.SetTexture("_BaseMap", dotTex);
+                mat.SetTextureScale("_BaseMap", new Vector2(10f, 10f));
+            }
             mat.renderQueue = (int)RenderQueue.Transparent;
             AssetDatabase.CreateAsset(mat, matPath);
             Debug.Log("[ARPlaneSetup] Created ARPlane material.");
@@ -41,13 +51,8 @@ public static class ARPlaneSetup
             mr.shadowCastingMode = ShadowCastingMode.Off;
             mr.receiveShadows = false;
 
-            // Boundary line renderer
-            var lr = go.AddComponent<LineRenderer>();
-            lr.loop = true;
-            lr.startWidth = 0.02f;
-            lr.endWidth   = 0.02f;
-            lr.sharedMaterial = mat;
-            lr.useWorldSpace  = false;
+            // Feeds plane bounds to the feathered shader (no hard border).
+            go.AddComponent<ARPlaneFeather>();
 
             PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
             Object.DestroyImmediate(go);
