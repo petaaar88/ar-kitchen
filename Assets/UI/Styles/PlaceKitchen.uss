@@ -1,0 +1,25 @@
+.place-screen {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 64px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.hint-label {
+    background-color: rgba(22, 30, 46, 0.88);
+    border-radius: 24px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 28px;
+    padding-right: 28px;
+    color: rgb(245, 248, 255);
+    font-size: 18px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-width: 88%;
+}

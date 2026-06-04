@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/Styles/PlaceKitchen.uss" />
+    <ui:VisualElement name="place-screen" class="place-screen" picking-mode="Ignore">
+        <ui:Label name="hint-label" text="Tap the blue surface to place your kitchen" class="hint-label" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

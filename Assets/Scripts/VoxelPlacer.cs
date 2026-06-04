@@ -22,7 +22,7 @@ public class VoxelPlacer : MonoBehaviour
 
     public GameObject Voxel { get; private set; }
     public bool IsPlaced { get; private set; }
-    public bool PlacementEnabled { get; set; } = true;
+    public bool PlacementEnabled { get; set; } = false;
 
     public event System.Action OnPlaced;
 
