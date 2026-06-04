@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/Styles/Scanning.uss" />
+    <ui:VisualElement name="scan-screen" class="scan-screen">
+        <ui:VisualElement name="reticle-area" class="reticle-area">
+            <ui:VisualElement name="reticle" class="reticle">
+                <ui:VisualElement class="corner corner--tl" picking-mode="Ignore" />
+                <ui:VisualElement class="corner corner--tr" picking-mode="Ignore" />
+                <ui:VisualElement class="corner corner--bl" picking-mode="Ignore" />
+                <ui:VisualElement class="corner corner--br" picking-mode="Ignore" />
+                <ui:VisualElement name="scan-line-glow" class="scan-line-glow" picking-mode="Ignore" />
+                <ui:VisualElement name="scan-line" class="scan-line" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="scan-card" class="scan-card">
+            <ui:VisualElement name="scan-card-sheen" class="scan-card-sheen" picking-mode="Ignore" />
+            <ui:VisualElement name="scan-badge" class="scan-badge">
+                <ui:Label text="⛶" class="scan-badge-icon" />
+            </ui:VisualElement>
+            <ui:Label text="Scanning your room" class="scan-title" />
+            <ui:Label text="Slowly move your phone across the floor and walls" class="scan-subtitle" />
+            <ui:VisualElement name="dots-row" class="dots-row">
+                <ui:VisualElement name="dot0" class="dot" picking-mode="Ignore" />
+                <ui:VisualElement name="dot1" class="dot" picking-mode="Ignore" />
+                <ui:VisualElement name="dot2" class="dot" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

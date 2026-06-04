@@ -11,6 +11,16 @@ Priority is one of `High`, `Medium`, `Low`. Managed by the `/todo` and `/plan` s
 ## Done
 
 <!-- DONE -->
+- [x] [High] Scanning panel: Scanning.uxml/uss — glossy reticle (4 corner brackets) + vertical scan line w/ glow, bottom glass card with square icon, title, subtitle, pulsing dots (no progress bar) *(2026-06-04, done 2026-06-04)*
+- [x] [High] Scanning panel: ScanningPanel.cs — animate scan line (ping-pong) + dots (staggered pulse) via UI Toolkit scheduler; show/hide API *(2026-06-04, done 2026-06-04)*
+- [x] [High] Scanning panel: SurfaceScanFlow.cs — show Scanning first, subscribe to ARPlaneManager.trackablesChanged, swap to Surfaces-found card on first plane (after minScanSeconds) *(2026-06-04, done 2026-06-04)*
+- [x] [High] Scanning panel: scene wiring — ScanningUI (UIDocument) + ARUIFlow GameObjects in MainScene; verified animation + flow via play-mode render *(2026-06-04, done 2026-06-04)*
+- [x] [High] Surfaces Found panel: scaffold Assets/UI (Documents/, Styles/) + PanelSettings.asset (Scale With Screen Size, 1080x1920, match 0.5) *(2026-06-04, done 2026-06-04)*
+- [x] [High] Surfaces Found panel: author SurfacesFound.uxml — glass container with checkmark badge, title, subtitle, progress bar, button *(2026-06-04, done 2026-06-04)*
+- [x] [High] Surfaces Found panel: author SurfacesFound.uss — fake-glass (translucent fill, edge highlight, top sheen), blue button, blue accent line *(2026-06-04, done 2026-06-04)*
+- [x] [High] Surfaces Found panel: add UI GameObject + UIDocument to MainScene, assign PanelSettings + UXML *(2026-06-04, done 2026-06-04)*
+- [x] [High] Surfaces Found panel: SurfacesFoundPanel.cs controller — query button, expose show/hide + stub Place-pressed event; compile-check *(2026-06-04, done 2026-06-04)*
+- [x] [High] Surfaces Found panel: screenshot game view, compare to reference, iterate USS until it matches *(2026-06-04, done 2026-06-04)*
 - [x] [High] Voxel placement: Voxel prefab — 1×1×1m cube, wireframe outline + semi-transparent URP material, pivot at bottom-center *(2026-04-21, done 2026-04-22)*
 - [x] [High] Voxel placement: VoxelController — MonoBehaviour owning dimensions, position, rotation; exposes Resize, MoveTo, Rotate methods *(2026-04-21, done 2026-04-22)*
 - [x] [High] Voxel placement: AR tap-to-place — raycast hit on plane spawns voxel once; subsequent taps ignored outside Edit > Placement *(2026-04-21, done 2026-04-22)*

@@ -1,0 +1,155 @@
+/* Scanning panel — glossy reticle + bottom glass card (mobile-cheap) */
+
+.scan-screen {
+    flex-grow: 1;
+    align-items: center;
+}
+
+/* Centers the reticle and pushes the card to the bottom */
+.reticle-area {
+    flex-grow: 1;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Square viewfinder; corners + scan line are absolute children */
+.reticle {
+    width: 520px;
+    height: 520px;
+}
+
+.corner {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-color: rgb(74, 144, 255);
+}
+
+.corner--tl {
+    top: 0;
+    left: 0;
+    border-top-width: 4px;
+    border-left-width: 4px;
+    border-top-left-radius: 16px;
+}
+
+.corner--tr {
+    top: 0;
+    right: 0;
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-top-right-radius: 16px;
+}
+
+.corner--bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+    border-bottom-left-radius: 16px;
+}
+
+.corner--br {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 4px;
+    border-right-width: 4px;
+    border-bottom-right-radius: 16px;
+}
+
+/* Crisp scan line + softer glow behind it (top driven from C#) */
+.scan-line {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 3px;
+    background-color: rgb(140, 190, 255);
+}
+
+.scan-line-glow {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: rgba(74, 144, 255, 0.22);
+}
+
+/* Bottom glass card */
+.scan-card {
+    width: 88%;
+    max-width: 660px;
+    margin-bottom: 64px;
+    background-color: rgba(22, 30, 46, 0.82);
+    border-radius: 28px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    padding-top: 26px;
+    padding-bottom: 26px;
+    padding-left: 24px;
+    padding-right: 24px;
+    align-items: center;
+    overflow: hidden;
+}
+
+.scan-card-sheen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+}
+
+.scan-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: rgba(74, 144, 255, 0.18);
+    border-width: 1px;
+    border-color: rgba(120, 160, 255, 0.5);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.scan-badge-icon {
+    color: rgb(120, 180, 255);
+    font-size: 26px;
+    -unity-font-style: bold;
+}
+
+.scan-title {
+    color: rgb(245, 248, 255);
+    font-size: 28px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 6px;
+}
+
+.scan-subtitle {
+    color: rgba(182, 192, 212, 0.92);
+    font-size: 16px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 18px;
+}
+
+/* Pulsing dots (opacity driven from C#) */
+.dots-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: rgb(120, 180, 255);
+    margin-left: 6px;
+    margin-right: 6px;
+}
