@@ -1,0 +1,134 @@
+/* Placed-kitchen HUD — top render toggles + bottom info card & Edit button.
+   Fake-glass styling matching the Scanning / Surfaces-found panels. */
+
+.hud {
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+/* ── Top bar: Voxel / Planes render toggles, anchored top-right ───────── */
+.top-bar {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 18px;
+    padding-right: 18px;
+}
+
+/* Pill toggle — glass (off) base. .is-on swaps to the blue accent. */
+.pill {
+    flex-direction: row;
+    align-items: center;
+    height: 46px;
+    margin-left: 10px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 18px;
+    padding-right: 20px;
+    border-radius: 23px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.14);
+    background-color: rgba(22, 30, 46, 0.82);
+}
+
+.pill:hover {
+    background-color: rgba(34, 44, 64, 0.88);
+}
+
+.pill.is-on {
+    background-color: rgb(43, 100, 245);
+    border-color: rgba(150, 185, 255, 0.55);
+}
+
+.pill.is-on:hover {
+    background-color: rgb(58, 114, 255);
+}
+
+.pill-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: rgba(190, 200, 220, 0.85);
+    -unity-text-align: middle-center;
+}
+
+.pill-text {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: rgba(205, 214, 232, 0.95);
+}
+
+.pill.is-on .pill-icon,
+.pill.is-on .pill-text {
+    color: rgb(255, 255, 255);
+}
+
+/* ── Bottom bar: info card + Edit button ─────────────────────────────── */
+.bottom-bar {
+    flex-direction: row;
+    align-items: stretch;
+    padding-left: 18px;
+    padding-right: 18px;
+    padding-bottom: 26px;
+}
+
+.info-card {
+    flex-grow: 1;
+    justify-content: center;
+    background-color: rgba(22, 30, 46, 0.82);
+    border-radius: 22px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 22px;
+    padding-right: 22px;
+}
+
+.card-title {
+    font-size: 19px;
+    -unity-font-style: bold;
+    color: rgb(245, 248, 255);
+    margin-bottom: 3px;
+}
+
+.card-subtitle {
+    font-size: 14px;
+    color: rgba(170, 180, 200, 0.9);
+}
+
+.edit-button {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-left: 14px;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 0;
+    padding-left: 26px;
+    padding-right: 28px;
+    border-radius: 22px;
+    border-width: 0;
+    background-color: rgb(43, 100, 245);
+}
+
+.edit-button:hover {
+    background-color: rgb(58, 114, 255);
+}
+
+.edit-button:active {
+    background-color: rgb(34, 84, 220);
+}
+
+.edit-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+.edit-text {
+    font-size: 19px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+}

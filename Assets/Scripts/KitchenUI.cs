@@ -24,7 +24,7 @@ public class KitchenUI : MonoBehaviour
         subButtonPanel.SetActive(false);
         doneButton.gameObject.SetActive(false);
 
-        editButton.onClick.AddListener(stateManager.EnterEdit);
+        if (editButton != null) editButton.onClick.AddListener(stateManager.EnterEdit);
         doneButton.onClick.AddListener(stateManager.ExitEdit);
         scaleButton.onClick.AddListener(() => stateManager.SetMode(VoxelEditMode.Scale));
         placementButton.onClick.AddListener(() => stateManager.SetMode(VoxelEditMode.Placement));
@@ -49,7 +49,7 @@ public class KitchenUI : MonoBehaviour
 
     void OnEditingChanged(bool editing)
     {
-        editButton.gameObject.SetActive(!editing);
+        if (editButton != null) editButton.gameObject.SetActive(!editing);
         doneButton.gameObject.SetActive(editing);
         subButtonPanel.SetActive(editing);
     }
