@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.InputSystem;
+using ArKitchen.UI;
 
 [RequireComponent(typeof(ARRaycastManager))]
 public class VoxelMovement : MonoBehaviour
@@ -45,6 +46,7 @@ public class VoxelMovement : MonoBehaviour
 
     static bool IsPointerOverUI(Vector2 screenPos)
     {
+        if (KitchenEditPanel.IsPointerOverBlockingUi(screenPos)) return true;
         if (EventSystem.current == null) return false;
         var data = new PointerEventData(EventSystem.current) { position = screenPos };
         UIHits.Clear();

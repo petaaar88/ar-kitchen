@@ -18,14 +18,15 @@ namespace ArKitchen.UI
         [SerializeField] float dotCycleSeconds = 1.2f;
 
         const float Inset = 8f;     // matches scan-line left/right inset-ish padding
-        const float GlowHeight = 22f;
-        const float LineHeight = 3f;
+        const float GlowHeight = 28f;
+        const float LineHeight = 4f;
 
         UIDocument _document;
         VisualElement _root;
         VisualElement _reticle;
         VisualElement _scanLine;
         VisualElement _scanGlow;
+        VisualElement _progressFill;
         VisualElement[] _dots;
         IVisualElementScheduledItem _anim;
         IVisualElementScheduledItem _fadeAnim;
@@ -39,6 +40,7 @@ namespace ArKitchen.UI
             _reticle = _root.Q("reticle");
             _scanLine = _root.Q("scan-line");
             _scanGlow = _root.Q("scan-line-glow");
+            _progressFill = _root.Q("scan-progress-fill");
             _dots = new[] { _root.Q("dot0"), _root.Q("dot1"), _root.Q("dot2") };
 
             _startTime = Time.time;
@@ -79,6 +81,12 @@ namespace ArKitchen.UI
                     float pulse = Mathf.Sin(local * Mathf.PI); // 0 -> 1 -> 0
                     _dots[i].style.opacity = 0.25f + 0.75f * Mathf.Clamp01(pulse);
                 }
+            }
+
+            if (_progressFill != null)
+            {
+                float progress = Mathf.PingPong(t / 2.4f, 1f);
+                _progressFill.style.width = Length.Percent(18f + 82f * progress);
             }
         }
 

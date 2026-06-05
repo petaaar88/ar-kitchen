@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.InputSystem;
+using ArKitchen.UI;
 
 /// <summary>
 /// Handles one-shot voxel placement on a detected AR plane.
@@ -67,6 +68,7 @@ public class VoxelPlacer : MonoBehaviour
 
     static bool IsPointerOverUI(Vector2 screenPos)
     {
+        if (KitchenEditPanel.IsPointerOverBlockingUi(screenPos)) return true;
         if (EventSystem.current == null) return false;
         var data = new PointerEventData(EventSystem.current) { position = screenPos };
         UIHits.Clear();

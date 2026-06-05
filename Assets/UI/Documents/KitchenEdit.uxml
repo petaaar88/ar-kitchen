@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/Styles/KitchenEdit.uss" />
+    <ui:VisualElement name="edit-shell" class="edit-shell">
+        <ui:Button name="done-button" class="done-button" text="Done" />
+
+        <ui:VisualElement name="context-panel" class="context-panel">
+            <ui:VisualElement class="panel-header">
+                <ui:VisualElement name="header-icon" class="header-icon">
+                    <ui:Label name="header-icon-label" text="S" class="header-icon-label" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-copy">
+                    <ui:Label name="header-title" text="Scale" class="header-title" />
+                    <ui:Label name="header-hint" text="Set the kitchen footprint" class="header-hint" />
+                </ui:VisualElement>
+                <ui:VisualElement name="header-right" class="header-right" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="scale-panel" class="mode-panel">
+                <ui:VisualElement class="control-row">
+                    <ui:VisualElement class="row-top">
+                        <ui:Label text="Width" class="control-label" />
+                        <ui:Label name="width-value" text="1.0m" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="slider-line">
+                        <ui:Button name="width-dec" text="-" class="round-button" />
+                        <ui:Slider name="width-slider" class="metric-slider" low-value="0.3" high-value="4" value="1" />
+                        <ui:Button name="width-inc" text="+" class="round-button" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="control-row">
+                    <ui:VisualElement class="row-top">
+                        <ui:Label text="Depth" class="control-label" />
+                        <ui:Label name="depth-value" text="1.0m" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="slider-line">
+                        <ui:Button name="depth-dec" text="-" class="round-button" />
+                        <ui:Slider name="depth-slider" class="metric-slider" low-value="0.3" high-value="4" value="1" />
+                        <ui:Button name="depth-inc" text="+" class="round-button" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="control-row control-row--last">
+                    <ui:VisualElement class="row-top">
+                        <ui:Label text="Height" class="control-label" />
+                        <ui:Label name="height-value" text="1.0m" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="slider-line">
+                        <ui:Button name="height-dec" text="-" class="round-button" />
+                        <ui:Slider name="height-slider" class="metric-slider" low-value="0.3" high-value="4" value="1" />
+                        <ui:Button name="height-inc" text="+" class="round-button" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="move-panel" class="mode-panel">
+                <ui:VisualElement class="move-pad">
+                    <ui:VisualElement class="pad-spacer" />
+                    <ui:Button name="move-forward" text="Up" class="pad-button" />
+                    <ui:VisualElement class="pad-spacer" />
+                    <ui:Button name="move-left" text="Left" class="pad-button" />
+                    <ui:VisualElement class="pad-center"><ui:Label text="Move" class="pad-center-label" /></ui:VisualElement>
+                    <ui:Button name="move-right" text="Right" class="pad-button" />
+                    <ui:VisualElement class="pad-spacer" />
+                    <ui:Button name="move-back" text="Down" class="pad-button" />
+                    <ui:VisualElement class="pad-spacer" />
+                </ui:VisualElement>
+                <ui:Label text="Or drag the kitchen space on a detected blue plane." class="panel-note" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="rotate-panel" class="mode-panel">
+                <ui:VisualElement class="rotate-main">
+                    <ui:Button name="rotate-left" text="15 deg" class="step-button" />
+                    <ui:VisualElement class="rotate-readout">
+                        <ui:Label name="rotation-value" text="0 deg" class="rotation-value" />
+                        <ui:Label text="orientation" class="rotation-caption" />
+                    </ui:VisualElement>
+                    <ui:Button name="rotate-right" text="15 deg" class="step-button" />
+                </ui:VisualElement>
+                <ui:VisualElement name="snap-row" class="snap-row" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="fill-panel" class="mode-panel">
+                <ui:VisualElement class="fill-status-row">
+                    <ui:Label name="free-label" text="0.0 m free" class="free-label" />
+                    <ui:Button name="remove-last-button" text="Undo" class="ghost-button" />
+                </ui:VisualElement>
+                <ui:Label name="mandatory-label" text="" class="mandatory-label" />
+                <ui:ScrollView name="placed-strip" class="placed-strip" mode="Horizontal" />
+                <ui:VisualElement name="category-row" class="category-row" />
+                <ui:ScrollView name="catalog-scroll" class="catalog-scroll">
+                    <ui:VisualElement name="catalog-grid" class="catalog-grid" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="color-panel" class="mode-panel">
+                <ui:VisualElement class="color-target-row">
+                    <ui:Button name="main-color-button" text="Main" class="segment-button is-selected" />
+                    <ui:Button name="secondary-color-button" text="Secondary" class="segment-button" />
+                    <ui:VisualElement name="color-preview" class="color-preview" />
+                </ui:VisualElement>
+                <ui:VisualElement class="control-row">
+                    <ui:VisualElement class="row-top">
+                        <ui:Label text="Red" class="control-label" />
+                        <ui:Label name="red-value" text="0" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:Slider name="red-slider" class="color-slider" low-value="0" high-value="1" value="0" />
+                </ui:VisualElement>
+                <ui:VisualElement class="control-row">
+                    <ui:VisualElement class="row-top">
+                        <ui:Label text="Green" class="control-label" />
+                        <ui:Label name="green-value" text="0" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:Slider name="green-slider" class="color-slider" low-value="0" high-value="1" value="0" />
+                </ui:VisualElement>
+                <ui:VisualElement class="control-row control-row--last">
+                    <ui:VisualElement class="row-top">
+                        <ui:Label text="Blue" class="control-label" />
+                        <ui:Label name="blue-value" text="0" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:Slider name="blue-slider" class="color-slider" low-value="0" high-value="1" value="0" />
+                </ui:VisualElement>
+                <ui:Label name="hex-label" text="#000000" class="hex-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="mode-bar" class="mode-bar">
+            <ui:Button name="mode-move" text="Move" class="mode-button" />
+            <ui:Button name="mode-scale" text="Scale" class="mode-button is-selected" />
+            <ui:Button name="mode-rotate" text="Rotate" class="mode-button" />
+            <ui:Button name="mode-fill" text="Fill" class="mode-button" />
+            <ui:Button name="mode-color" text="Color" class="mode-button" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="variant-overlay" class="variant-overlay">
+            <ui:VisualElement name="variant-backdrop" class="variant-backdrop" />
+            <ui:VisualElement class="variant-sheet">
+                <ui:VisualElement class="variant-header">
+                    <ui:VisualElement>
+                        <ui:Label name="variant-title" text="Element" class="variant-title" />
+                        <ui:Label text="Choose a variant" class="variant-subtitle" />
+                    </ui:VisualElement>
+                    <ui:Button name="variant-close" text="X" class="variant-close" />
+                </ui:VisualElement>
+                <ui:VisualElement name="variant-list" class="variant-list" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:Label name="toast-label" text="" class="toast-label" />
+    </ui:VisualElement>
+</ui:UXML>

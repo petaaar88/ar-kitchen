@@ -23,7 +23,9 @@ namespace ArKitchen.UI
         Button _voxelToggle;
         Button _planesToggle;
         Button _editButton;
+        Label _cardSubtitle;
         IVisualElementScheduledItem _fadeAnim;
+        KitchenLayoutController _layout;
 
         bool _voxelVisible = true;
         bool _planesVisible = true;
@@ -47,6 +49,7 @@ namespace ArKitchen.UI
                 stateManager.OnVoxelPlaced -= OnVoxelPlaced;
                 stateManager.OnEditingChanged -= OnEditingChanged;
             }
+            UnbindLayout();
         }
 
         void EnsureRoot()
@@ -61,6 +64,7 @@ namespace ArKitchen.UI
             _voxelToggle  = _root.Q<Button>("voxel-toggle");
             _planesToggle = _root.Q<Button>("planes-toggle");
             _editButton   = _root.Q<Button>("edit-button");
+            _cardSubtitle = _root.Q<Label>("card-subtitle");
 
             if (_voxelToggle != null)  _voxelToggle.clicked  += ToggleVoxel;
             if (_planesToggle != null) _planesToggle.clicked += TogglePlanes;
@@ -77,6 +81,8 @@ namespace ArKitchen.UI
             _voxelVisible = true;
             ApplyVoxelClass();
             ApplyToCurrentVoxel();
+            BindLayout();
+            UpdateSubtitle();
             FadeIn();
         }
 
@@ -88,7 +94,33 @@ namespace ArKitchen.UI
                 _bottomBar.style.display = editing ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
-        // ── Toggles ──────────────────────────────────────────────────────
+        void BindLayout()
+        {
+            UnbindLayout();
+            var controller = stateManager != null ? stateManager.Controller : null;
+            _layout = controller != null ? controller.GetComponent<KitchenLayoutController>() : null;
+            if (_layout != null)
+                _layout.OnLayoutChanged += UpdateSubtitle;
+        }
+
+        void UnbindLayout()
+        {
+            if (_layout != null)
+                _layout.OnLayoutChanged -= UpdateSubtitle;
+            _layout = null;
+        }
+
+        void UpdateSubtitle()
+        {
+            if (_cardSubtitle == null) return;
+
+            int count = _layout != null ? _layout.Placed.Count : 0;
+            _cardSubtitle.text = count == 0
+                ? "Empty - ready to fill"
+                : $"{count} unit{(count == 1 ? "" : "s")} placed";
+        }
+
+        // Toggles
         void ToggleVoxel()
         {
             _voxelVisible = !_voxelVisible;
@@ -123,7 +155,7 @@ namespace ArKitchen.UI
             pill.EnableInClassList("is-on", on);
         }
 
-        // ── Visibility ───────────────────────────────────────────────────
+        // Visibility
         public void Show()
         {
             EnsureRoot();

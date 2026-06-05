@@ -7,7 +7,7 @@ namespace ArKitchen.UI
     /// <summary>
     /// Controls the "Surfaces found" panel built in UI Toolkit.
     /// Exposes Show/Hide and a PlacePressed event that higher-level
-    /// placement logic can hook into. Pure UI — no AR logic here yet.
+    /// placement logic can hook into. Pure UI, no AR logic here yet.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class SurfacesFoundPanel : MonoBehaviour

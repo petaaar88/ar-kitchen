@@ -1,4 +1,4 @@
-/* Surfaces Found panel — fake-glass styling (mobile-cheap, no backdrop blur) */
+/* Surfaces-found confirmation card. */
 
 .screen {
     flex-grow: 1;
@@ -6,40 +6,35 @@
     justify-content: flex-end;
 }
 
-/* The glass card — anchored to the bottom, matching the Scanning card */
 .card {
-    width: 88%;
-    max-width: 660px;
-    margin-bottom: 64px;
-    background-color: rgba(22, 30, 46, 0.78);
-    border-radius: 28px;
+    width: 90%;
+    max-width: 720px;
+    margin-bottom: 86px;
+    background-color: rgba(18, 21, 28, 0.74);
+    border-radius: 26px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
-    padding-top: 28px;
-    padding-bottom: 24px;
-    padding-left: 24px;
-    padding-right: 24px;
+    padding-top: 32px;
+    padding-bottom: 30px;
+    padding-left: 36px;
+    padding-right: 36px;
     align-items: center;
     overflow: hidden;
 }
 
-
-/* Circular checkmark badge */
 .badge {
-    width: 56px;
-    height: 56px;
-    border-radius: 28px;
-    background-color: rgba(43, 95, 255, 0.18);
-    border-width: 1px;
-    border-color: rgba(120, 160, 255, 0.5);
+    width: 88px;
+    height: 88px;
+    border-radius: 44px;
+    background-color: rgba(45, 127, 249, 0.14);
     align-items: center;
     justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: 22px;
 }
 
 .badge-check {
-    color: rgb(96, 156, 255);
-    font-size: 32px;
+    color: rgb(45, 127, 249);
+    font-size: 26px;
     -unity-font-style: bold;
 }
 
@@ -48,36 +43,49 @@
     font-size: 34px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .subtitle {
-    color: rgba(182, 192, 212, 0.92);
-    font-size: 21px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 25px;
     -unity-text-align: middle-center;
     white-space: normal;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
+.scan-progress {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.15);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
 
-/* Gradient-ish blue button (flat base + sheen child for gloss) */
+.scan-progress-fill {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: rgb(45, 127, 249);
+}
+
 .button {
     width: 100%;
-    height: 60px;
-    border-radius: 16px;
-    background-color: rgb(43, 100, 245);
+    height: 64px;
+    border-radius: 14px;
+    background-color: rgb(45, 127, 249);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 24px;
+    font-size: 25px;
     -unity-font-style: bold;
     overflow: hidden;
 }
 
 .button:hover {
-    background-color: rgb(58, 114, 255);
+    background-color: rgb(65, 145, 255);
 }
 
 .button:active {
-    background-color: rgb(34, 84, 220);
+    background-color: rgb(35, 106, 220);
 }
-
