@@ -8,6 +8,8 @@ namespace ArKitchen.UI
     [RequireComponent(typeof(UIDocument))]
     public class KitchenEditPanel : MonoBehaviour
     {
+        enum MoveDir { Forward, Back, Left, Right }
+
         const float MinSize = 0.3f;
         const float MaxSize = 4f;
         const float SizeStep = 0.1f;
@@ -228,21 +230,50 @@ namespace ArKitchen.UI
 
         void BindMoveControls()
         {
-            BindMoveButton("move-forward", new Vector3(0f, 0f, MoveStep));
-            BindMoveButton("move-back", new Vector3(0f, 0f, -MoveStep));
-            BindMoveButton("move-left", new Vector3(-MoveStep, 0f, 0f));
-            BindMoveButton("move-right", new Vector3(MoveStep, 0f, 0f));
+            BindMoveButton("move-forward", MoveDir.Forward);
+            BindMoveButton("move-back", MoveDir.Back);
+            BindMoveButton("move-left", MoveDir.Left);
+            BindMoveButton("move-right", MoveDir.Right);
         }
 
-        void BindMoveButton(string name, Vector3 delta)
+        void BindMoveButton(string name, MoveDir dir)
         {
             var button = _root.Q<Button>(name);
             if (button != null) button.clicked += () =>
             {
                 var controller = stateManager != null ? stateManager.Controller : null;
                 if (controller == null) return;
-                controller.MoveTo(controller.transform.position + delta);
+                controller.MoveTo(controller.transform.position + ViewRelativeDelta(dir) * MoveStep);
                 ShowToast("Moved 10 cm");
+            };
+        }
+
+        // The pad is screen-relative: "Up" pushes the kitchen away from the
+        // viewer along the floor, "Right" to the viewer's right - regardless of
+        // where they walk or how the voxel is rotated. World-fixed axes felt
+        // arbitrary once the user moved around the space.
+        Vector3 ViewRelativeDelta(MoveDir dir)
+        {
+            var cam = arCamera != null ? arCamera : Camera.main;
+            Vector3 forward = Vector3.forward;
+            Vector3 right = Vector3.right;
+            if (cam != null)
+            {
+                forward = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up);
+                // Looking near-straight down/up collapses forward; fall back to
+                // the screen-up direction so the pad still tracks the view.
+                if (forward.sqrMagnitude < 1e-4f)
+                    forward = Vector3.ProjectOnPlane(cam.transform.up, Vector3.up);
+                forward.Normalize();
+                right = Vector3.ProjectOnPlane(cam.transform.right, Vector3.up).normalized;
+            }
+
+            return dir switch
+            {
+                MoveDir.Forward => forward,
+                MoveDir.Back => -forward,
+                MoveDir.Right => right,
+                _ => -right
             };
         }
 

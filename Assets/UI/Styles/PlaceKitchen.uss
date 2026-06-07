@@ -9,7 +9,7 @@
 
 .hint-label {
     background-color: rgba(18, 21, 28, 0.74);
-    border-radius: 999px;
+    border-radius: 14px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
     padding-top: 18px;

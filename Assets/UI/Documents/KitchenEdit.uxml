@@ -55,13 +55,13 @@
             <ui:VisualElement name="move-panel" class="mode-panel">
                 <ui:VisualElement class="move-pad">
                     <ui:VisualElement class="pad-spacer" />
-                    <ui:Button name="move-forward" text="Up" class="pad-button" />
+                    <ui:Button name="move-forward" text="↑" class="pad-button" />
                     <ui:VisualElement class="pad-spacer" />
-                    <ui:Button name="move-left" text="Left" class="pad-button" />
+                    <ui:Button name="move-left" text="←" class="pad-button" />
                     <ui:VisualElement class="pad-center"><ui:Label text="Move" class="pad-center-label" /></ui:VisualElement>
-                    <ui:Button name="move-right" text="Right" class="pad-button" />
+                    <ui:Button name="move-right" text="→" class="pad-button" />
                     <ui:VisualElement class="pad-spacer" />
-                    <ui:Button name="move-back" text="Down" class="pad-button" />
+                    <ui:Button name="move-back" text="↓" class="pad-button" />
                     <ui:VisualElement class="pad-spacer" />
                 </ui:VisualElement>
                 <ui:Label text="Or drag the kitchen space on a detected blue plane." class="panel-note" />

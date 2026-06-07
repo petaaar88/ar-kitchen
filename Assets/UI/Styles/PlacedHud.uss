@@ -23,7 +23,7 @@
     margin-bottom: 0;
     padding-left: 18px;
     padding-right: 20px;
-    border-radius: 999px;
+    border-radius: 14px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.14);
     background-color: rgba(18, 21, 28, 0.60);

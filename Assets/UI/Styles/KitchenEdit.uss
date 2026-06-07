@@ -12,7 +12,7 @@
     min-width: 110px;
     padding-left: 24px;
     padding-right: 26px;
-    border-radius: 999px;
+    border-radius: 14px;
     border-width: 0;
     background-color: rgb(255, 255, 255);
     color: rgb(17, 17, 17);
@@ -140,7 +140,7 @@
 }
 
 .move-pad {
-    width: 270px;
+    width: 294px;
     align-self: center;
     flex-direction: row;
     flex-wrap: wrap;
@@ -161,8 +161,17 @@
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.08);
     color: rgb(255, 255, 255);
-    font-size: 18px;
+    font-size: 34px;
     -unity-font-style: bold;
+}
+
+.pad-button:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+.pad-button:active {
+    background-color: rgb(45, 127, 249);
+    border-color: rgb(45, 127, 249);
 }
 
 .pad-center {
@@ -266,7 +275,7 @@
     height: 46px;
     padding-left: 20px;
     padding-right: 20px;
-    border-radius: 999px;
+    border-radius: 12px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.08);
@@ -503,12 +512,12 @@
     display: none;
     position: absolute;
     align-self: center;
-    bottom: 246px;
+    top: 52px;
     padding-top: 14px;
     padding-bottom: 14px;
     padding-left: 24px;
     padding-right: 24px;
-    border-radius: 999px;
+    border-radius: 14px;
     background-color: rgba(0, 0, 0, 0.82);
     color: rgb(255, 255, 255);
     font-size: 22px;
