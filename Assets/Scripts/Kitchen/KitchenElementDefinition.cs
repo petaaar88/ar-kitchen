@@ -18,6 +18,10 @@ public class KitchenElementDefinition : ScriptableObject
     [SerializeField] Color color = Color.gray;
     [SerializeField] bool isMandatory;
     [SerializeField] bool isFiller;
+    [Tooltip("Price in EUR for the default model (variant 0).")]
+    [SerializeField, Min(0f)] float basePrice;
+    [Tooltip("Price in EUR for each alternative variant (index matches variantPrefabs). Leave empty to use basePrice for all variants.")]
+    [SerializeField, Min(0f)] float[] variantPrices;
 
     public string DisplayName => displayName;
     public string Code => code;
@@ -29,6 +33,7 @@ public class KitchenElementDefinition : ScriptableObject
     public Color Color => color;
     public bool IsMandatory => isMandatory;
     public bool IsFiller => isFiller;
+    public float BasePrice => basePrice;
 
     // Ordered variant access: index 0 is the default ModelPrefab, then variantPrefabs.
     public int VariantCount => 1 + (variantPrefabs != null ? variantPrefabs.Length : 0);
@@ -40,5 +45,14 @@ public class KitchenElementDefinition : ScriptableObject
         if (variantPrefabs != null && index < variantPrefabs.Length && variantPrefabs[index] != null)
             return variantPrefabs[index];
         return modelPrefab;
+    }
+
+    public float GetVariantPrice(int index)
+    {
+        if (index <= 0) return basePrice;
+        int i = index - 1;
+        if (variantPrices != null && i < variantPrices.Length)
+            return variantPrices[i];
+        return basePrice;
     }
 }

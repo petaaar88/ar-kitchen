@@ -297,7 +297,8 @@
 
 .placed-strip {
     display: none;
-    height: 72px;
+    min-height: 72px;
+    max-height: 100px;
     margin-bottom: 16px;
 }
 
@@ -306,7 +307,7 @@
 }
 
 .placed-button {
-    height: 54px;
+    min-height: 54px;
     min-width: 130px;
     margin-right: 8px;
     border-radius: 14px;
@@ -315,6 +316,7 @@
     background-color: rgba(45, 127, 249, 0.16);
     color: rgb(255, 255, 255);
     font-size: 22px;
+    white-space: normal;
 }
 
 .category-button {

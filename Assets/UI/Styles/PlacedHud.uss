@@ -93,19 +93,35 @@
     color: rgba(255, 255, 255, 0.62);
 }
 
+.card-price {
+    font-size: 28px;
+    -unity-font-style: bold;
+    color: rgb(90, 200, 120);
+    margin-top: 6px;
+    display: none;
+}
+
+.card-price.has-price {
+    display: flex;
+}
+
+.action-column {
+    flex-direction: column;
+    justify-content: space-between;
+    margin-left: 18px;
+}
+
 .edit-button {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-left: 18px;
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-right: 0;
+    margin: 0;
     padding-left: 42px;
     padding-right: 42px;
     border-radius: 20px;
     border-width: 0;
     background-color: rgb(45, 127, 249);
+    flex-grow: 1;
 }
 
 .edit-button:hover {
@@ -120,4 +136,109 @@
     font-size: 35px;
     -unity-font-style: bold;
     color: rgb(255, 255, 255);
+}
+
+.purchase-button {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    margin-top: 12px;
+    padding-left: 28px;
+    padding-right: 28px;
+    border-radius: 20px;
+    border-width: 0;
+    background-color: rgb(52, 199, 89);
+    flex-grow: 1;
+}
+
+.purchase-button.is-visible {
+    display: flex;
+}
+
+.purchase-button:hover {
+    background-color: rgb(72, 219, 109);
+}
+
+.purchase-button:active {
+    background-color: rgb(40, 167, 70);
+}
+
+.purchase-text {
+    font-size: 32px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+}
+
+.congrats-overlay {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.congrats-overlay.is-visible {
+    display: flex;
+}
+
+.congrats-backdrop {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.congrats-card {
+    background-color: rgba(10, 12, 15, 0.97);
+    border-radius: 28px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.14);
+    padding-top: 52px;
+    padding-bottom: 48px;
+    padding-left: 52px;
+    padding-right: 52px;
+    align-items: center;
+    width: 78%;
+}
+
+.congrats-title {
+    font-size: 52px;
+    -unity-font-style: bold;
+    color: rgb(245, 248, 255);
+    -unity-text-align: middle-center;
+    margin-bottom: 18px;
+}
+
+.congrats-body {
+    font-size: 30px;
+    color: rgba(255, 255, 255, 0.70);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 48px;
+}
+
+.congrats-close {
+    width: 300px;
+    height: 80px;
+    border-radius: 20px;
+    border-width: 0;
+    background-color: rgb(52, 199, 89);
+    color: rgb(255, 255, 255);
+    font-size: 36px;
+    -unity-font-style: bold;
+}
+
+.congrats-close:hover {
+    background-color: rgb(72, 219, 109);
+}
+
+.congrats-close:active {
+    background-color: rgb(40, 167, 70);
 }

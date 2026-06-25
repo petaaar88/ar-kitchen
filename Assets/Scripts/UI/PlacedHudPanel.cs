@@ -15,6 +15,7 @@ namespace ArKitchen.UI
     {
         [SerializeField] VoxelStateManager stateManager;
         [SerializeField] ARPlaneManager planeManager;
+        [SerializeField] KitchenElementDefinition[] definitions;
         [SerializeField] float fadeSeconds = 0.3f;
 
         UIDocument _document;
@@ -23,7 +24,10 @@ namespace ArKitchen.UI
         Button _voxelToggle;
         Button _planesToggle;
         Button _editButton;
+        Button _purchaseButton;
         Label _cardSubtitle;
+        Label _cardPrice;
+        VisualElement _congratsOverlay;
         IVisualElementScheduledItem _fadeAnim;
         KitchenLayoutController _layout;
 
@@ -64,11 +68,20 @@ namespace ArKitchen.UI
             _voxelToggle  = _root.Q<Button>("voxel-toggle");
             _planesToggle = _root.Q<Button>("planes-toggle");
             _editButton   = _root.Q<Button>("edit-button");
-            _cardSubtitle = _root.Q<Label>("card-subtitle");
+            _cardSubtitle    = _root.Q<Label>("card-subtitle");
+            _cardPrice       = _root.Q<Label>("card-price");
+            _purchaseButton  = _root.Q<Button>("purchase-button");
+            _congratsOverlay = _root.Q<VisualElement>("congrats-overlay");
 
-            if (_voxelToggle != null)  _voxelToggle.clicked  += ToggleVoxel;
-            if (_planesToggle != null) _planesToggle.clicked += TogglePlanes;
-            if (_editButton != null)   _editButton.clicked   += () => stateManager?.EnterEdit();
+            if (_voxelToggle != null)   _voxelToggle.clicked   += ToggleVoxel;
+            if (_planesToggle != null)  _planesToggle.clicked  += TogglePlanes;
+            if (_editButton != null)    _editButton.clicked    += () => stateManager?.EnterEdit();
+            if (_purchaseButton != null) _purchaseButton.clicked += ShowCongrats;
+
+            var congratsClose = _root.Q<Button>("congrats-close");
+            if (congratsClose != null) congratsClose.clicked += HideCongrats;
+            var backdrop = _root.Q<VisualElement>("congrats-backdrop");
+            backdrop?.RegisterCallback<PointerDownEvent>(_ => HideCongrats());
 
             ApplyVoxelClass();
             ApplyPlanesClass();
@@ -118,7 +131,40 @@ namespace ArKitchen.UI
             _cardSubtitle.text = count == 0
                 ? "Empty - ready to fill"
                 : $"{count} unit{(count == 1 ? "" : "s")} placed";
+
+            if (_cardPrice != null)
+            {
+                float price = _layout != null ? _layout.TotalPrice : 0f;
+                bool hasPrice = count > 0 && price > 0f;
+                _cardPrice.text = hasPrice ? $"{price:N0} €" : "";
+                _cardPrice.EnableInClassList("has-price", hasPrice);
+            }
+
+            _purchaseButton?.EnableInClassList("is-visible", AllMandatoryPlaced());
         }
+
+        bool AllMandatoryPlaced()
+        {
+            if (definitions == null || _layout == null) return false;
+            foreach (var def in definitions)
+            {
+                if (def == null || !def.IsMandatory) continue;
+                bool found = false;
+                foreach (var view in _layout.Placed)
+                {
+                    if (view != null && view.Definition == def) { found = true; break; }
+                }
+                if (!found) return false;
+            }
+            // At least one item must be placed.
+            return _layout.Placed.Count > 0;
+        }
+
+        void ShowCongrats() =>
+            _congratsOverlay?.EnableInClassList("is-visible", true);
+
+        void HideCongrats() =>
+            _congratsOverlay?.EnableInClassList("is-visible", false);
 
         // Toggles
         void ToggleVoxel()

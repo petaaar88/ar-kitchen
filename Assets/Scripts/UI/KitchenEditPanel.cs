@@ -641,10 +641,10 @@ namespace ArKitchen.UI
                 var view = _layout.Placed[i];
                 if (view == null || view.Definition == null) continue;
                 var captured = view;
-                var button = new Button(() => OpenVariantSheet(captured))
-                {
-                    text = $"{GroupLabel(view.Definition.Group)} {view.Definition.DisplayName}"
-                };
+                float placedPrice = view.Definition.GetVariantPrice(view.CurrentVariantIndex);
+                string placedLabel = $"{GroupLabel(view.Definition.Group)} {view.Definition.DisplayName}";
+                if (placedPrice > 0f) placedLabel += $"\n{placedPrice:N0} €";
+                var button = new Button(() => OpenVariantSheet(captured)) { text = placedLabel };
                 button.AddToClassList("placed-button");
                 _placedStrip.contentContainer.Add(button);
                 _placedButtons.Add(button);
@@ -657,7 +657,9 @@ namespace ArKitchen.UI
             int h = Mathf.RoundToInt(def.HeightMeters * 100f);
             int d = Mathf.RoundToInt(def.DepthMeters * 100f);
             string title = string.IsNullOrEmpty(def.Code) ? def.DisplayName : $"{def.Code} {def.DisplayName}";
-            return $"{title}\n{w}x{h}x{d} cm";
+            string dims = $"{w}x{h}x{d} cm";
+            float price = def.BasePrice;
+            return price > 0f ? $"{title}\n{dims}\n{price:N0} €" : $"{title}\n{dims}";
         }
 
         static string GroupLabel(KitchenElementGroup group) =>
@@ -732,8 +734,10 @@ namespace ArKitchen.UI
                 {
                     int index = i;
                     var prefab = view.Definition.GetVariant(i);
-                    string name = prefab != null ? prefab.name : $"Variant {i + 1}";
-                    var button = new Button(() => ChooseVariant(index)) { text = name };
+                    string variantName = prefab != null ? prefab.name : $"Variant {i + 1}";
+                    float variantPrice = view.Definition.GetVariantPrice(i);
+                    string variantLabel = variantPrice > 0f ? $"{variantName}\n{variantPrice:N0} €" : variantName;
+                    var button = new Button(() => ChooseVariant(index)) { text = variantLabel };
                     button.AddToClassList("variant-button");
                     button.EnableInClassList("is-selected", i == view.CurrentVariantIndex);
                     _variantList.Add(button);
@@ -746,6 +750,7 @@ namespace ArKitchen.UI
         {
             if (_selectedVariantView == null) return;
             _selectedVariantView.ApplyVariant(index);
+            _layout?.NotifyLayoutChanged();
             ShowToast("Variant swapped");
             CloseVariantSheet();
             UpdatePlacedStrip();

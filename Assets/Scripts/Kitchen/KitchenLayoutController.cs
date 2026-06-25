@@ -17,7 +17,21 @@ public class KitchenLayoutController : MonoBehaviour
     public float UsedLength { get; private set; }
     public float RemainingLength => Mathf.Max(0f, voxel.Depth - UsedLength);
 
+    public float TotalPrice
+    {
+        get
+        {
+            float total = 0f;
+            foreach (var view in _placed)
+                if (view != null && view.Definition != null)
+                    total += view.Definition.GetVariantPrice(view.CurrentVariantIndex);
+            return total;
+        }
+    }
+
     public event System.Action OnLayoutChanged;
+
+    public void NotifyLayoutChanged() => OnLayoutChanged?.Invoke();
 
     void Reset() => voxel = GetComponent<VoxelController>();
 

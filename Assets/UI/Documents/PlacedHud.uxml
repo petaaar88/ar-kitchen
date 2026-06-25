@@ -16,10 +16,24 @@
             <ui:VisualElement name="info-card" class="info-card" picking-mode="Ignore">
                 <ui:Label text="Kitchen space" class="card-title" picking-mode="Ignore" />
                 <ui:Label name="card-subtitle" text="Empty - ready to fill" class="card-subtitle" picking-mode="Ignore" />
+                <ui:Label name="card-price" text="" class="card-price" picking-mode="Ignore" />
             </ui:VisualElement>
-            <ui:Button name="edit-button" class="edit-button">
-                <ui:Label text="Edit" class="edit-text" picking-mode="Ignore" />
-            </ui:Button>
+            <ui:VisualElement class="action-column">
+                <ui:Button name="edit-button" class="edit-button">
+                    <ui:Label text="Edit" class="edit-text" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="purchase-button" class="purchase-button">
+                    <ui:Label text="Purchase" class="purchase-text" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="congrats-overlay" class="congrats-overlay">
+            <ui:VisualElement name="congrats-backdrop" class="congrats-backdrop" />
+            <ui:VisualElement class="congrats-card">
+                <ui:Label text="Congratulations!" class="congrats-title" picking-mode="Ignore" />
+                <ui:Label text="You have purchased a kitchen." class="congrats-body" picking-mode="Ignore" />
+                <ui:Button name="congrats-close" text="Done" class="congrats-close" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
