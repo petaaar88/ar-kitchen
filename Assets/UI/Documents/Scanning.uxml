@@ -20,10 +20,7 @@
                 <ui:VisualElement class="scan-badge-corner scan-badge-corner--br" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:Label text="Scanning your room" class="scan-title" />
-            <ui:Label text="Slowly move your phone across the floor and walls" class="scan-subtitle" />
-            <ui:VisualElement name="scan-progress" class="scan-progress">
-                <ui:VisualElement name="scan-progress-fill" class="scan-progress-fill" picking-mode="Ignore" />
-            </ui:VisualElement>
+            <ui:Label text="Slowly move your phone across the floor" class="scan-subtitle" />
             <ui:VisualElement name="dots-row" class="dots-row">
                 <ui:VisualElement name="dot0" class="dot" picking-mode="Ignore" />
                 <ui:VisualElement name="dot1" class="dot" picking-mode="Ignore" />

@@ -6,9 +6,9 @@
 
 .done-button {
     position: absolute;
-    top: 52px;
+    top: 87px;
     left: 24px;
-    height: 46px;
+    height: 70px;
     min-width: 110px;
     padding-left: 24px;
     padding-right: 26px;
@@ -16,7 +16,7 @@
     border-width: 0;
     background-color: rgb(255, 255, 255);
     color: rgb(17, 17, 17);
-    font-size: 22px;
+    font-size: 30px;
     -unity-font-style: bold;
 }
 
@@ -27,7 +27,7 @@
     bottom: 160px;
     min-height: 340px;
     max-height: 720px;
-    background-color: rgba(18, 21, 28, 0.74);
+    background-color: rgba(10, 12, 15, 0.93);
     border-radius: 26px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
@@ -45,8 +45,8 @@
 }
 
 .header-icon {
-    width: 54px;
-    height: 54px;
+    width: 65px;
+    height: 65px;
     border-radius: 16px;
     background-color: rgba(45, 127, 249, 0.16);
     align-items: center;
@@ -56,7 +56,7 @@
 
 .header-icon-label {
     color: rgb(45, 127, 249);
-    font-size: 24px;
+    font-size: 38px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
@@ -67,14 +67,14 @@
 
 .header-title {
     color: rgb(255, 255, 255);
-    font-size: 29px;
+    font-size: 40px;
     -unity-font-style: bold;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
 }
 
 .header-hint {
     color: rgba(255, 255, 255, 0.55);
-    font-size: 21px;
+    font-size: 26px;
 }
 
 .header-right {
@@ -106,12 +106,12 @@
 
 .control-label {
     color: rgba(255, 255, 255, 0.62);
-    font-size: 21px;
+    font-size: 34px;
 }
 
 .value-label {
     color: rgb(255, 255, 255);
-    font-size: 27px;
+    font-size: 32px;
     -unity-font-style: bold;
 }
 
@@ -121,14 +121,14 @@
 }
 
 .round-button {
-    width: 52px;
-    height: 52px;
-    border-radius: 26px;
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.10);
     color: rgb(255, 255, 255);
-    font-size: 28px;
+    font-size: 34px;
     -unity-font-style: bold;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .move-pad {
-    width: 294px;
+    width: 324px;
     align-self: center;
     flex-direction: row;
     flex-wrap: wrap;
@@ -150,18 +150,18 @@
 .pad-button,
 .pad-spacer,
 .pad-center {
-    width: 82px;
-    height: 82px;
+    width: 96px;
+    height: 96px;
     margin: 6px;
 }
 
 .pad-button {
-    border-radius: 18px;
+    border-radius: 20px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.08);
     color: rgb(255, 255, 255);
-    font-size: 34px;
+    font-size: 40px;
     -unity-font-style: bold;
 }
 
@@ -210,7 +210,7 @@
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.08);
     color: rgb(255, 255, 255);
-    font-size: 24px;
+    font-size: 32px;
     -unity-font-style: bold;
 }
 
@@ -236,7 +236,7 @@
 
 .snap-button {
     flex-grow: 1;
-    height: 48px;
+    height: 56px;
     margin-left: 4px;
     margin-right: 4px;
     border-radius: 12px;
@@ -244,7 +244,7 @@
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.06);
     color: rgb(255, 255, 255);
-    font-size: 18px;
+    font-size: 28px;
 }
 
 .snap-button.is-selected,
@@ -280,7 +280,7 @@
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.08);
     color: rgb(255, 255, 255);
-    font-size: 19px;
+    font-size: 23px;
 }
 
 .mandatory-label {
@@ -314,12 +314,12 @@
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(45, 127, 249, 0.16);
     color: rgb(255, 255, 255);
-    font-size: 18px;
+    font-size: 22px;
 }
 
 .category-button {
     flex-grow: 1;
-    height: 52px;
+    height: 68px;
     margin-left: 4px;
     margin-right: 4px;
     border-radius: 14px;
@@ -327,7 +327,7 @@
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.06);
     color: rgb(255, 255, 255);
-    font-size: 21px;
+    font-size: 26px;
     -unity-font-style: bold;
 }
 
@@ -350,7 +350,7 @@
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(255, 255, 255, 0.06);
     color: rgb(255, 255, 255);
-    font-size: 21px;
+    font-size: 26px;
     -unity-font-style: bold;
     white-space: normal;
     -unity-text-align: middle-left;
@@ -396,7 +396,7 @@
     height: 96px;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(18, 21, 28, 0.74);
+    background-color: rgba(10, 12, 15, 0.93);
     border-radius: 22px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
@@ -415,7 +415,7 @@
     border-width: 0;
     background-color: rgba(0, 0, 0, 0);
     color: rgba(255, 255, 255, 0.62);
-    font-size: 18px;
+    font-size: 28px;
     -unity-font-style: bold;
 }
 

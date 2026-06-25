@@ -9,15 +9,15 @@
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-    padding-top: 52px;
+    padding-top: 89px;
     padding-right: 24px;
 }
 
 .pill {
     flex-direction: row;
     align-items: center;
-    height: 44px;
-    margin-left: 12px;
+    height: 70px;
+    margin-left: 20px;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
@@ -43,7 +43,7 @@
 }
 
 .pill-icon {
-    font-size: 18px;
+    font-size: 24px;
     margin-right: 10px;
     color: rgba(255, 255, 255, 0.72);
     -unity-text-align: middle-center;
@@ -51,7 +51,7 @@
 }
 
 .pill-text {
-    font-size: 21px;
+    font-size: 29px;
     color: rgba(255, 255, 255, 0.72);
 }
 
@@ -71,7 +71,7 @@
 .info-card {
     flex-grow: 1;
     justify-content: center;
-    background-color: rgba(18, 21, 28, 0.74);
+    background-color: rgba(10, 12, 15, 0.93);
     border-radius: 20px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.12);
@@ -117,7 +117,7 @@
 }
 
 .edit-text {
-    font-size: 31px;
+    font-size: 35px;
     -unity-font-style: bold;
     color: rgb(255, 255, 255);
 }
