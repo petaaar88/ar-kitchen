@@ -8,14 +8,42 @@ public class KitchenLayoutController : MonoBehaviour
 
     const float Epsilon = 1e-4f;
 
+    // The working desk flexes to fill the free run; never let it shrink to nothing.
+    const float MinFillerWidth = 0.1f;
+
+    // Recess the desk a few cm toward the wall so its front sits behind the
+    // cabinet line instead of flush with it.
+    const float FillerBackInset = 0.05f;
+
     [SerializeField] VoxelController voxel;
     [SerializeField] KitchenElementView elementPrefab;
+    [Tooltip("Filler definition (the working desk) added via the placed-strip markers, not the catalog.")]
+    [SerializeField] KitchenElementDefinition fillerDefinition;
+    [Tooltip("Material applied to the procedural filler body.")]
+    [SerializeField] Material fillerMaterial;
+    [Tooltip("Material applied to the filler's white worktop slab (like the sink units).")]
+    [SerializeField] Material fillerTopMaterial;
 
     readonly List<KitchenElementView> _placed = new();
+
+    // The filler lives outside _placed so price/mandatory/ordering logic is
+    // unaffected. _fillerSlot is an insertion index in [0, _placed.Count].
+    KitchenElementView _filler;
+    int _fillerSlot;
 
     public IReadOnlyList<KitchenElementView> Placed => _placed;
     public float UsedLength { get; private set; }
     public float RemainingLength => Mathf.Max(0f, voxel.Depth - UsedLength);
+
+    public bool HasFiller => _filler != null;
+    public int FillerSlot => _fillerSlot;
+    public int UnitCount => _placed.Count;
+
+    // A filler can be added when none exists, the voxel is deep enough for it, and
+    // there's at least the minimum free run to give it.
+    public bool CanAddFiller =>
+        fillerDefinition != null && elementPrefab != null && _filler == null
+        && DepthFits(fillerDefinition) && RemainingLength >= MinFillerWidth - Epsilon;
 
     public float TotalPrice
     {
@@ -59,8 +87,13 @@ public class KitchenLayoutController : MonoBehaviour
     public bool DepthFits(KitchenElementDefinition def) =>
         def != null && def.DepthMeters <= voxel.Width + Epsilon;
 
-    public bool LengthFits(KitchenElementDefinition def) =>
-        def != null && def.WidthMeters <= RemainingLength + Epsilon;
+    public bool LengthFits(KitchenElementDefinition def)
+    {
+        if (def == null) return false;
+        // Reserve the filler's minimum so adding a unit shrinks but never erases it.
+        float available = RemainingLength - (_filler != null ? MinFillerWidth : 0f);
+        return def.WidthMeters <= available + Epsilon;
+    }
 
     public AddResult TryAdd(KitchenElementDefinition def)
     {
@@ -89,12 +122,43 @@ public class KitchenLayoutController : MonoBehaviour
 
     public void Clear()
     {
-        if (_placed.Count == 0) return;
+        if (_placed.Count == 0 && _filler == null) return;
         foreach (var view in _placed)
             if (view != null) Destroy(view.gameObject);
         _placed.Clear();
+        if (_filler != null) { Destroy(_filler.gameObject); _filler = null; }
         UsedLength = 0f;
         OnLayoutChanged?.Invoke();
+    }
+
+    // Adds the working desk at the given slot (insertion index among the placed
+    // units). Its width is flex-computed in Reposition each pass.
+    public void AddFillerAt(int slot)
+    {
+        if (!CanAddFiller) return;
+        _fillerSlot = Mathf.Clamp(slot, 0, _placed.Count);
+        _filler = Instantiate(elementPrefab, transform);
+        _filler.ApplyFiller(fillerDefinition, fillerMaterial, fillerTopMaterial);
+        Reposition();
+        OnLayoutChanged?.Invoke();
+    }
+
+    public void MoveFillerTo(int slot)
+    {
+        if (_filler == null) return;
+        _fillerSlot = Mathf.Clamp(slot, 0, _placed.Count);
+        Reposition();
+        OnLayoutChanged?.Invoke();
+    }
+
+    public bool RemoveFiller()
+    {
+        if (_filler == null) return false;
+        Destroy(_filler.gameObject);
+        _filler = null;
+        Reposition();
+        OnLayoutChanged?.Invoke();
+        return true;
     }
 
     void Reposition()
@@ -106,15 +170,41 @@ public class KitchenLayoutController : MonoBehaviour
         float hw = voxel.Width * 0.5f;
         float hd = voxel.Depth * 0.5f;
         var rot = Quaternion.Euler(0f, 270f, 0f);
-        float used = 0f;
+
+        // Units determine UsedLength; the filler spans whatever run is left.
+        float unitsWidth = 0f;
         foreach (var view in _placed)
+            if (view != null && view.Definition != null) unitsWidth += view.Definition.WidthMeters;
+        UsedLength = unitsWidth;
+        float fillerWidth = Mathf.Max(0f, voxel.Depth - unitsWidth);
+
+        // A voxel resize can starve the flex filler below its minimum (or make the
+        // voxel too shallow); drop it rather than render a degenerate sliver.
+        if (_filler != null && (fillerWidth < MinFillerWidth - Epsilon || !DepthFits(fillerDefinition)))
         {
+            Destroy(_filler.gameObject);
+            _filler = null;
+        }
+        if (_filler != null) _fillerSlot = Mathf.Clamp(_fillerSlot, 0, _placed.Count);
+
+        float used = 0f;
+        for (int i = 0; i <= _placed.Count; i++)
+        {
+            if (_filler != null && _fillerSlot == i)
+            {
+                _filler.SetFillerSize(fillerWidth);
+                _filler.transform.localPosition = new Vector3(-hw + fillerDefinition.DepthMeters - FillerBackInset, 0f, hd - used - fillerWidth);
+                _filler.transform.localRotation = rot;
+                used += fillerWidth;
+            }
+            if (i == _placed.Count) break;
+
+            var view = _placed[i];
             if (view == null) continue;
             var def = view.Definition;
             view.transform.localPosition = new Vector3(-hw + def.DepthMeters, 0f, hd - used - def.WidthMeters);
             view.transform.localRotation = rot;
             used += def.WidthMeters;
         }
-        UsedLength = used;
     }
 }

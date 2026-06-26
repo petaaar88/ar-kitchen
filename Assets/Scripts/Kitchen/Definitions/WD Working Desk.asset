@@ -10,19 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1028ac078672aeb1cb82057775404331, type: 3}
-  m_Name: W3 Sink
+  m_Name: WD Working Desk
   m_EditorClassIdentifier: Assembly-CSharp::KitchenElementDefinition
-  displayName: Sink
-  code: W3
-  group: 1
-  modelPrefab: {fileID: 3074187761110537852, guid: 0aa837c0d7c4dbf779795e4e7c362e01, type: 3}
-  variantPrefabs:
-  - {fileID: 7498858130721699188, guid: 101eaf5cb4c9b0babaacb0ee9c9c29ca, type: 3}
-  widthMeters: 0.9
-  heightMeters: 0.9
+  displayName: Working Desk
+  code: WD
+  group: 0
+  modelPrefab: {fileID: 0}
+  variantPrefabs: []
+  widthMeters: 0.6
+  heightMeters: 0.93
   depthMeters: 0.6
-  color: {r: 0.7, g: 0.75, b: 0.8, a: 1}
+  color: {r: 0.82, g: 0.66, b: 0.45, a: 1}
   isMandatory: 0
-  isFiller: 0
-  basePrice: 500
+  isFiller: 1
+  basePrice: 0
   variantPrices: []

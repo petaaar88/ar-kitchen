@@ -24,3 +24,5 @@ MonoBehaviour:
   color: {r: 0.7, g: 0.75, b: 0.8, a: 1}
   isMandatory: 0
   isFiller: 0
+  basePrice: 300
+  variantPrices: []

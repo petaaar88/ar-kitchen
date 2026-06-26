@@ -523,6 +523,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KitchenLayoutController
   voxel: {fileID: 289173944659139515}
   elementPrefab: {fileID: 7149980500960220788, guid: e3d99a3d4c15ae666a477b5f1ce2d861, type: 3}
+  fillerDefinition: {fileID: 11400000, guid: dc3cfcfe5c939d2919a169ffe8e73d35, type: 2}
+  fillerMaterial: {fileID: 2100000, guid: 07fb900a48a481d5495a5ed433aaace0, type: 2}
+  fillerTopMaterial: {fileID: 2100000, guid: 12b30011904050728a5047068623da93, type: 2}
 --- !u!1 &2955574180221748869
 GameObject:
   m_ObjectHideFlags: 0

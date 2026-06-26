@@ -16,9 +16,12 @@ MonoBehaviour:
   code: C1
   group: 2
   modelPrefab: {fileID: 4679466726417156535, guid: 209f2805cf1748444b8ab827df7e8c10, type: 3}
+  variantPrefabs: []
   widthMeters: 0.3
   heightMeters: 0.02
   depthMeters: 0.6
   color: {r: 0.95, g: 0.45, b: 0.3, a: 1}
   isMandatory: 0
   isFiller: 0
+  basePrice: 120
+  variantPrices: []

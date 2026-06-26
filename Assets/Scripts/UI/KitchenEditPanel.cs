@@ -542,7 +542,7 @@ namespace ArKitchen.UI
 
             foreach (var def in definitions)
             {
-                if (def == null || def.Group != _activeGroup) continue;
+                if (def == null || def.IsFiller || def.Group != _activeGroup) continue;
                 var captured = def;
                 var button = new Button(() => AddDefinition(captured))
                 {
@@ -632,23 +632,75 @@ namespace ArKitchen.UI
             _placedStrip.contentContainer.Clear();
             _placedButtons.Clear();
 
-            bool hasPlaced = _layout != null && _layout.Placed.Count > 0;
-            _placedStrip.EnableInClassList("is-visible", hasPlaced);
-            if (!hasPlaced) return;
-
-            for (int i = 0; i < _layout.Placed.Count; i++)
+            if (_layout == null)
             {
-                var view = _layout.Placed[i];
-                if (view == null || view.Definition == null) continue;
-                var captured = view;
-                float placedPrice = view.Definition.GetVariantPrice(view.CurrentVariantIndex);
-                string placedLabel = $"{GroupLabel(view.Definition.Group)} {view.Definition.DisplayName}";
-                if (placedPrice > 0f) placedLabel += $"\n{placedPrice:N0} €";
-                var button = new Button(() => OpenVariantSheet(captured)) { text = placedLabel };
-                button.AddToClassList("placed-button");
-                _placedStrip.contentContainer.Add(button);
-                _placedButtons.Add(button);
+                _placedStrip.EnableInClassList("is-visible", false);
+                return;
             }
+
+            int units = _layout.Placed.Count;
+            bool hasFiller = _layout.HasFiller;
+            bool canAddFiller = _layout.CanAddFiller;
+
+            // Strip stays visible while there are units, a desk, or a slot to drop one.
+            bool visible = units > 0 || hasFiller || canAddFiller;
+            _placedStrip.EnableInClassList("is-visible", visible);
+            if (!visible) return;
+
+            // Walk slots 0..units: a desk chip / '+' marker can sit at each slot,
+            // a placed unit between consecutive slots.
+            for (int i = 0; i <= units; i++)
+            {
+                if (hasFiller && _layout.FillerSlot == i)
+                    AddFillerChip();
+                else if (!hasFiller && canAddFiller)
+                    AddInsertMarker(i);
+
+                if (i == units) break;
+
+                var view = _layout.Placed[i];
+                if (view != null && view.Definition != null)
+                    AddPlacedButton(view);
+            }
+        }
+
+        void AddPlacedButton(KitchenElementView view)
+        {
+            var captured = view;
+            float placedPrice = view.Definition.GetVariantPrice(view.CurrentVariantIndex);
+            string placedLabel = $"{GroupLabel(view.Definition.Group)} {view.Definition.DisplayName}";
+            if (placedPrice > 0f) placedLabel += $"\n{placedPrice:N0} €";
+            var button = new Button(() => OpenVariantSheet(captured)) { text = placedLabel };
+            button.AddToClassList("placed-button");
+            _placedStrip.contentContainer.Add(button);
+            _placedButtons.Add(button);
+        }
+
+        void AddInsertMarker(int slot)
+        {
+            int captured = slot;
+            var button = new Button(() =>
+            {
+                _layout?.AddFillerAt(captured);
+                ShowToast("Working desk added");
+            })
+            { text = "+" };
+            button.AddToClassList("insert-marker");
+            _placedStrip.contentContainer.Add(button);
+        }
+
+        void AddFillerChip()
+        {
+            int widthCm = Mathf.RoundToInt(_layout.RemainingLength * 100f);
+            var button = new Button(() =>
+            {
+                _layout?.RemoveFiller();
+                ShowToast("Working desk removed");
+            })
+            { text = $"Desk\n{widthCm} cm" };
+            button.AddToClassList("placed-button");
+            button.AddToClassList("filler-chip");
+            _placedStrip.contentContainer.Add(button);
         }
 
         static string FormatCatalogLabel(KitchenElementDefinition def)
