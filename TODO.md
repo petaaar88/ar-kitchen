@@ -6,6 +6,12 @@ Planned work, ideas, and features. Each line:
 Priority is one of `High`, `Medium`, `Low`. Managed by the `/todo` and `/plan` skills.
 
 <!-- OPEN -->
+- [ ] [High] Texture picker: triplanar URP lit shader (Assets/Shaders/KitchenTriplanar.shader) — world-space triplanar sample of _BaseMap at fixed tiling, lit, base color *(2026-06-26)*
+- [ ] [High] Texture picker: point KitchenMainMaterial + desk body material (fillerMaterial) at the triplanar shader; import placeholder textures into Assets/Textures/Kitchen/ (worktop fillerTopMaterial stays flat color) *(2026-06-26)*
+- [ ] [High] Texture picker: add Texture2D[] compatibleTextures (+ getter) to KitchenElementDefinition; populate per model via editor setup scripts (fridge→metal, sink/stove→own, desk→wood/stone) *(2026-06-26)*
+- [ ] [High] Texture picker: KitchenElementView.ApplyTexture(tex) — instance the primary material per view (FBX: KitchenMainMaterial submeshes; desk: body), set _BaseMap, remember + reapply after ApplyVariant; add a tap collider to the desk so it is selectable *(2026-06-26)*
+- [ ] [High] Texture picker: replace color-panel in KitchenEdit.uxml/.uss with a scrollable texture grid (texture as button icon, reuse .catalog-grid) + "Tap an element" hint; rename mode-color button to "Texture" *(2026-06-26)*
+- [ ] [High] Texture picker: KitchenEditPanel texture-mode logic — extend tap-raycast to Texture mode, select tapped view, build grid from its definition, on tap call view.ApplyTexture + highlight selected; rename VoxelEditMode.Color → Texture; delete dead MaterialColorUI.cs *(2026-06-26)*
 <!-- /OPEN -->
 
 ## Done

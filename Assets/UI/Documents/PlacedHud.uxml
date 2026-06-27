@@ -29,9 +29,15 @@
         </ui:VisualElement>
         <ui:VisualElement name="congrats-overlay" class="congrats-overlay">
             <ui:VisualElement name="congrats-backdrop" class="congrats-backdrop" />
-            <ui:VisualElement class="congrats-card">
-                <ui:Label text="Congratulations!" class="congrats-title" picking-mode="Ignore" />
-                <ui:Label text="You have purchased a kitchen." class="congrats-body" picking-mode="Ignore" />
+            <ui:VisualElement name="congrats-card" class="congrats-card">
+                <ui:VisualElement name="congrats-badge-wrap" class="congrats-badge-wrap" picking-mode="Ignore">
+                    <ui:VisualElement name="congrats-ring" class="congrats-ring" picking-mode="Ignore" />
+                    <ui:VisualElement name="congrats-badge" class="congrats-badge" picking-mode="Ignore">
+                        <ui:Label name="congrats-check" text="✓" class="congrats-check" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label name="congrats-title" text="Congratulations!" class="congrats-title" picking-mode="Ignore" />
+                <ui:Label name="congrats-body" text="Your new kitchen is all set." class="congrats-body" picking-mode="Ignore" />
                 <ui:Button name="congrats-close" text="Done" class="congrats-close" />
             </ui:VisualElement>
         </ui:VisualElement>

@@ -25,3 +25,8 @@ MonoBehaviour:
   isFiller: 1
   basePrice: 0
   variantPrices: []
+  compatibleTextures:
+  - {fileID: 2800000, guid: 9bbc31810dcf68b45b9aab9af29f1e46, type: 3}
+  - {fileID: 2800000, guid: d2ac1b68ec7ec5a4e97c6891455d5477, type: 3}
+  - {fileID: 2800000, guid: 37f295ba501f7694d92df98957663cfa, type: 3}
+  - {fileID: 2800000, guid: 38b9dcf4698469845a6f2e081bc13e42, type: 3}

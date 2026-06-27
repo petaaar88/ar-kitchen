@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum KitchenElementGroup { Storage, Washing, Cooking }
@@ -22,6 +23,8 @@ public class KitchenElementDefinition : ScriptableObject
     [SerializeField, Min(0f)] float basePrice;
     [Tooltip("Price in EUR for each alternative variant (index matches variantPrefabs). Leave empty to use basePrice for all variants.")]
     [SerializeField, Min(0f)] float[] variantPrices;
+    [Tooltip("Finishes offered in the Texture picker for this element. Applied to the primary (triplanar) material surfaces only; e.g. metal for appliances, wood/stone for the desk.")]
+    [SerializeField] Texture2D[] compatibleTextures;
 
     public string DisplayName => displayName;
     public string Code => code;
@@ -34,6 +37,7 @@ public class KitchenElementDefinition : ScriptableObject
     public bool IsMandatory => isMandatory;
     public bool IsFiller => isFiller;
     public float BasePrice => basePrice;
+    public IReadOnlyList<Texture2D> CompatibleTextures => compatibleTextures;
 
     // Ordered variant access: index 0 is the default ModelPrefab, then variantPrefabs.
     public int VariantCount => 1 + (variantPrefabs != null ? variantPrefabs.Length : 0);

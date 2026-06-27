@@ -149,11 +149,6 @@ public static class UISceneSetup
         var so = new SerializedObject(edit);
         so.FindProperty("stateManager").objectReferenceValue = stateManager;
         so.FindProperty("arCamera").objectReferenceValue = arCamera;
-        so.FindProperty("mainMaterial").objectReferenceValue =
-            AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/KitchenMainMaterial.mat");
-        so.FindProperty("secondaryMaterial").objectReferenceValue =
-            AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/KitchenSecondaryMaterial.mat");
-
         var defsProp = so.FindProperty("definitions");
         defsProp.arraySize = DefinitionPaths.Length;
         for (int i = 0; i < DefinitionPaths.Length; i++)

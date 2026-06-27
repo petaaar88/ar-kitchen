@@ -19,10 +19,20 @@ public class KitchenElementView : MonoBehaviour
 
     Transform _fillerBody;
     Transform _fillerTop;
+    BoxCollider _fillerCollider;
+
+    static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
+    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    static readonly int TextureScaleId = Shader.PropertyToID("_TextureScale");
+    Texture _chosenTexture;
+
+    GameObject _highlight;
+    static Material _highlightMaterial;
 
     public KitchenElementDefinition Definition => _definition;
     public int CurrentVariantIndex => _variantIndex;
     public bool IsFiller { get; private set; }
+    public Texture ChosenTexture => _chosenTexture;
 
     public void Apply(KitchenElementDefinition def)
     {
@@ -59,7 +69,13 @@ public class KitchenElementView : MonoBehaviour
         _fillerBody = CreateFillerPart("Body", bodyMaterial);
         _fillerTop = CreateFillerPart("Top", topMaterial != null ? topMaterial : bodyMaterial);
 
+        // Tap target so the desk is selectable in Texture mode - the primitive
+        // colliders are stripped in CreateFillerPart. Sized in SetFillerSize.
+        _fillerCollider = GetComponent<BoxCollider>();
+        if (_fillerCollider == null) _fillerCollider = gameObject.AddComponent<BoxCollider>();
+
         SetFillerSize(def.DepthMeters);
+        ReapplyTexture();
     }
 
     Transform CreateFillerPart(string partName, Material material)
@@ -100,6 +116,117 @@ public class KitchenElementView : MonoBehaviour
 
         _fillerTop.localScale = new Vector3(w, top, d);
         _fillerTop.localPosition = new Vector3(w * 0.5f, body + top * 0.5f, d * 0.5f);
+
+        if (_fillerCollider != null)
+        {
+            _fillerCollider.center = new Vector3(w * 0.5f, h * 0.5f, d * 0.5f);
+            _fillerCollider.size = new Vector3(w, h, d);
+        }
+    }
+
+    // Per-instance finish: sets _BaseMap on this view's primary surfaces. "Primary"
+    // = whatever uses the triplanar shader (it alone exposes _TextureScale) -
+    // KitchenMainMaterial on FBX units and the desk body; secondary/detail surfaces
+    // (plain Lit, no _TextureScale) are left untouched. The material is instanced
+    // per renderer so each placed unit keeps its own finish.
+    public void ApplyTexture(Texture texture)
+    {
+        _chosenTexture = texture;
+        ReapplyTexture();
+    }
+
+    // Re-pushes the chosen finish onto the current renderers. Called after the
+    // model is (re)built - a variant swap or filler rebuild replaces the meshes.
+    void ReapplyTexture()
+    {
+        if (_chosenTexture == null) return;
+
+        var renderers = GetComponentsInChildren<MeshRenderer>(true);
+        bool modelHasPrimary = false;
+        foreach (var meshRenderer in renderers)
+        {
+            foreach (var shared in meshRenderer.sharedMaterials)
+            {
+                if (shared != null && shared.HasProperty(TextureScaleId))
+                {
+                    modelHasPrimary = true;
+                    break;
+                }
+            }
+            if (modelHasPrimary) break;
+        }
+
+        foreach (var meshRenderer in renderers)
+        {
+            // meshRenderer.materials instantiates so the override stays local to this unit.
+            foreach (var instance in meshRenderer.materials)
+            {
+                if (instance == null) continue;
+                bool isPrimary = instance.HasProperty(TextureScaleId);
+                // C1 is an imported single-finish cooktop without a prefab material
+                // remap. If a model has no triplanar surface at all, still allow its
+                // ordinary URP BaseMap to receive the chosen finish.
+                if (isPrimary || (!modelHasPrimary && instance.HasProperty(BaseMapId)))
+                {
+                    instance.SetTexture(BaseMapId, _chosenTexture);
+                    if (instance.HasProperty(BaseColorId))
+                        instance.SetColor(BaseColorId, Color.white);
+                }
+            }
+        }
+    }
+
+    // Selection halo for Texture mode: a translucent box wrapping the element's
+    // footprint (read from the tap collider), parented so it tracks the view.
+    public void SetSelected(bool on)
+    {
+        if (!on)
+        {
+            if (_highlight != null) Destroy(_highlight);
+            _highlight = null;
+            return;
+        }
+
+        var box = GetComponent<BoxCollider>();
+        if (box == null) return;
+
+        if (_highlight == null)
+        {
+            _highlight = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            _highlight.name = "SelectionHighlight";
+            var primitiveCollider = _highlight.GetComponent<Collider>();
+            if (primitiveCollider != null) Destroy(primitiveCollider);
+            _highlight.transform.SetParent(transform, false);
+
+            var r = _highlight.GetComponent<MeshRenderer>();
+            r.sharedMaterial = HighlightMaterial();
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+        }
+
+        _highlight.transform.localPosition = box.center;
+        _highlight.transform.localScale = box.size * 1.04f + new Vector3(0.012f, 0.012f, 0.012f);
+    }
+
+    // Shared transparent unlit material for the selection halo.
+    static Material HighlightMaterial()
+    {
+        if (_highlightMaterial != null) return _highlightMaterial;
+
+        var shader = Shader.Find("Universal Render Pipeline/Unlit");
+        var mat = new Material(shader != null ? shader : Shader.Find("Sprites/Default"));
+        if (mat.HasProperty("_Surface")) mat.SetFloat("_Surface", 1f);          // transparent
+        if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
+        mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+        mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+
+        var tint = new Color(0.16f, 1f, 0.28f, 0.42f); // bright green, clearly visible
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", tint);
+        else mat.color = tint;
+        return _highlightMaterial = mat;
     }
 
     // Swaps the visible model to the given variant. Variants share the footprint,
@@ -137,12 +264,19 @@ public class KitchenElementView : MonoBehaviour
             t.localPosition = -bounds.min;
 
             // Tap target for variant selection: a box wrapping the model's
-            // footprint in this view's local space (now anchored at the origin).
+            // declared footprint. Imported mesh bounds can contain stray geometry
+            // and produce a huge invisible hit area, so never use them as the
+            // interactive collider size.
             var box = GetComponent<BoxCollider>();
             if (box == null) box = gameObject.AddComponent<BoxCollider>();
-            box.center = bounds.size * 0.5f;
-            box.size = bounds.size;
+            box.size = new Vector3(
+                Mathf.Max(0.01f, _definition.DepthMeters),
+                Mathf.Max(0.01f, _definition.HeightMeters),
+                Mathf.Max(0.01f, _definition.WidthMeters));
+            box.center = box.size * 0.5f;
         }
+
+        ReapplyTexture();
     }
 
     // Combined render bounds of the model expressed in this view's local space,

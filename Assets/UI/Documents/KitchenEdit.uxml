@@ -80,46 +80,23 @@
             </ui:VisualElement>
 
             <ui:VisualElement name="fill-panel" class="mode-panel">
-                <ui:VisualElement class="fill-status-row">
+                <ui:VisualElement class="fill-toolbar">
                     <ui:Label name="free-label" text="0.0 m free" class="free-label" />
-                    <ui:Button name="remove-last-button" text="Undo" class="ghost-button" />
+                    <ui:Button name="add-worktop-button" text="+ Worktop" class="ghost-button worktop-button" />
                 </ui:VisualElement>
                 <ui:Label name="mandatory-label" text="" class="mandatory-label" />
-                <ui:ScrollView name="placed-strip" class="placed-strip" mode="Horizontal" />
+                <ui:ScrollView name="placed-strip" class="placed-strip" mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" />
                 <ui:VisualElement name="category-row" class="category-row" />
-                <ui:ScrollView name="catalog-scroll" class="catalog-scroll">
+                <ui:ScrollView name="catalog-scroll" class="catalog-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic">
                     <ui:VisualElement name="catalog-grid" class="catalog-grid" />
                 </ui:ScrollView>
             </ui:VisualElement>
 
             <ui:VisualElement name="color-panel" class="mode-panel">
-                <ui:VisualElement class="color-target-row">
-                    <ui:Button name="main-color-button" text="Main" class="segment-button is-selected" />
-                    <ui:Button name="secondary-color-button" text="Secondary" class="segment-button" />
-                    <ui:VisualElement name="color-preview" class="color-preview" />
-                </ui:VisualElement>
-                <ui:VisualElement class="control-row">
-                    <ui:VisualElement class="row-top">
-                        <ui:Label text="Red" class="control-label" />
-                        <ui:Label name="red-value" text="0" class="value-label" />
-                    </ui:VisualElement>
-                    <ui:Slider name="red-slider" class="color-slider" low-value="0" high-value="1" value="0" />
-                </ui:VisualElement>
-                <ui:VisualElement class="control-row">
-                    <ui:VisualElement class="row-top">
-                        <ui:Label text="Green" class="control-label" />
-                        <ui:Label name="green-value" text="0" class="value-label" />
-                    </ui:VisualElement>
-                    <ui:Slider name="green-slider" class="color-slider" low-value="0" high-value="1" value="0" />
-                </ui:VisualElement>
-                <ui:VisualElement class="control-row control-row--last">
-                    <ui:VisualElement class="row-top">
-                        <ui:Label text="Blue" class="control-label" />
-                        <ui:Label name="blue-value" text="0" class="value-label" />
-                    </ui:VisualElement>
-                    <ui:Slider name="blue-slider" class="color-slider" low-value="0" high-value="1" value="0" />
-                </ui:VisualElement>
-                <ui:Label name="hex-label" text="#000000" class="hex-label" />
+                <ui:Label name="texture-hint" text="Tap an element to texture it" class="texture-hint" />
+                <ui:ScrollView name="texture-scroll" class="catalog-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic">
+                    <ui:VisualElement name="texture-grid" class="catalog-grid" />
+                </ui:ScrollView>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -127,8 +104,8 @@
             <ui:Button name="mode-move" text="Move" class="mode-button" />
             <ui:Button name="mode-scale" text="Scale" class="mode-button is-selected" />
             <ui:Button name="mode-rotate" text="Rotate" class="mode-button" />
-            <ui:Button name="mode-fill" text="Fill" class="mode-button" />
-            <ui:Button name="mode-color" text="Color" class="mode-button" />
+            <ui:Button name="mode-fill" text="Units" class="mode-button" />
+            <ui:Button name="mode-color" text="Texture" class="mode-button" />
         </ui:VisualElement>
 
         <ui:VisualElement name="variant-overlay" class="variant-overlay">

@@ -18,11 +18,8 @@ namespace ArKitchen.UI
 
         [SerializeField] VoxelStateManager stateManager;
         [SerializeField] Camera arCamera;
-        [SerializeField] Material mainMaterial;
-        [SerializeField] Material secondaryMaterial;
         [SerializeField] KitchenElementDefinition[] definitions;
 
-        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         static readonly List<string> MissingMandatory = new();
         static readonly List<KitchenEditPanel> Instances = new();
 
@@ -39,14 +36,13 @@ namespace ArKitchen.UI
         Label _variantTitle;
 
         Button _doneButton;
-        Button _removeLastButton;
-        Button _mainColorButton;
-        Button _secondaryColorButton;
+        Button _addWorktopButton;
 
         readonly Dictionary<VoxelEditMode, Button> _modeButtons = new();
         readonly Dictionary<VoxelEditMode, VisualElement> _modePanels = new();
         readonly Dictionary<KitchenElementGroup, Button> _categoryButtons = new();
         readonly Dictionary<Button, KitchenElementDefinition> _catalogDefinitions = new();
+        readonly Dictionary<Button, Label> _catalogActionLabels = new();
         readonly List<Button> _catalogButtons = new();
         readonly List<Button> _placedButtons = new();
         readonly List<Button> _snapButtons = new();
@@ -54,9 +50,6 @@ namespace ArKitchen.UI
         Slider _widthSlider;
         Slider _depthSlider;
         Slider _heightSlider;
-        Slider _redSlider;
-        Slider _greenSlider;
-        Slider _blueSlider;
 
         Label _widthValue;
         Label _depthValue;
@@ -64,19 +57,18 @@ namespace ArKitchen.UI
         Label _rotationValue;
         Label _freeLabel;
         Label _mandatoryLabel;
-        Label _redValue;
-        Label _greenValue;
-        Label _blueValue;
-        Label _hexLabel;
 
         ScrollView _placedStrip;
         VisualElement _catalogGrid;
-        VisualElement _colorPreview;
+        VisualElement _textureGrid;
+        Label _textureHint;
+        KitchenElementView _textureTarget;
+        readonly List<Button> _textureButtons = new();
 
         KitchenLayoutController _layout;
         KitchenElementGroup _activeGroup = KitchenElementGroup.Storage;
-        Material _activeMaterial;
         KitchenElementView _selectedVariantView;
+        bool _choosingWorktopSlot;
         IVisualElementScheduledItem _toastHide;
         bool _syncing;
 
@@ -118,18 +110,32 @@ namespace ArKitchen.UI
             return false;
         }
 
-        void Update()
+        // Texture-mode taps are routed through UI Toolkit's own event (the same one
+        // that drives the buttons), so a swatch press is reliably told apart from a
+        // 3D-world tap by its target - no screen/panel coordinate guessing.
+        void OnTexturePointerDown(PointerDownEvent evt)
         {
-            if (stateManager == null || stateManager.CurrentMode != VoxelEditMode.FillKitchen)
+            if (stateManager == null || stateManager.CurrentMode != VoxelEditMode.Color)
                 return;
-            if (!TryGetTap(out var screenPos) || IsPointerOverOwnUi(screenPos))
-                return;
+
+            // Landed on the panel or mode bar (a swatch, a mode button)? Let UI handle it.
+            for (var e = evt.target as VisualElement; e != null; e = e.parent)
+                if (e == _contextPanel || e.name == "mode-bar")
+                    return;
 
             var cam = arCamera != null ? arCamera : Camera.main;
             if (cam == null) return;
 
-            var view = RaycastForElement(cam.ScreenPointToRay(screenPos));
-            if (view != null) OpenVariantSheet(view);
+            var view = RaycastForElement(cam.ScreenPointToRay(CurrentPointerScreenPos()));
+            if (view != null) SelectTextureTarget(view); // tapped an element
+            else DeselectTexture();                      // tapped empty world space
+        }
+
+        static Vector2 CurrentPointerScreenPos()
+        {
+            if (Touchscreen.current != null) return Touchscreen.current.primaryTouch.position.ReadValue();
+            if (Mouse.current != null) return Mouse.current.position.ReadValue();
+            return default;
         }
 
         void EnsureRoot()
@@ -138,6 +144,7 @@ namespace ArKitchen.UI
             if (_document == null) _document = GetComponent<UIDocument>();
             _root = _document.rootVisualElement;
             if (_root == null) return;
+            _root.RegisterCallback<PointerDownEvent>(OnTexturePointerDown);
 
             _contextPanel = _root.Q("context-panel");
             _headerRight = _root.Q("header-right");
@@ -168,10 +175,9 @@ namespace ArKitchen.UI
             BindMoveControls();
             BindRotateControls();
             BindFillControls();
-            BindColorControls();
+            BindTextureControls();
             BindVariantControls();
 
-            _activeMaterial = mainMaterial;
             BuildCategories();
             BuildCatalog();
             OnModeChanged(VoxelEditMode.Scale);
@@ -305,29 +311,27 @@ namespace ArKitchen.UI
             _mandatoryLabel = _root.Q<Label>("mandatory-label");
             _placedStrip = _root.Q<ScrollView>("placed-strip");
             _catalogGrid = _root.Q("catalog-grid");
-            _removeLastButton = _root.Q<Button>("remove-last-button");
-            if (_removeLastButton != null)
-                _removeLastButton.clicked += () => _layout?.RemoveLast();
+            _addWorktopButton = _root.Q<Button>("add-worktop-button");
+            if (_addWorktopButton != null)
+                _addWorktopButton.clicked += () =>
+                {
+                    if (_layout == null || !_layout.CanAddFiller) return;
+                    if (_layout.Placed.Count == 0)
+                    {
+                        _layout.AddFillerAt(0);
+                        ShowToast("Worktop added");
+                        return;
+                    }
+
+                    _choosingWorktopSlot = !_choosingWorktopSlot;
+                    UpdateFillState();
+                };
         }
 
-        void BindColorControls()
+        void BindTextureControls()
         {
-            _mainColorButton = _root.Q<Button>("main-color-button");
-            _secondaryColorButton = _root.Q<Button>("secondary-color-button");
-            _colorPreview = _root.Q("color-preview");
-            _redSlider = _root.Q<Slider>("red-slider");
-            _greenSlider = _root.Q<Slider>("green-slider");
-            _blueSlider = _root.Q<Slider>("blue-slider");
-            _redValue = _root.Q<Label>("red-value");
-            _greenValue = _root.Q<Label>("green-value");
-            _blueValue = _root.Q<Label>("blue-value");
-            _hexLabel = _root.Q<Label>("hex-label");
-
-            if (_mainColorButton != null) _mainColorButton.clicked += () => SelectMaterial(mainMaterial);
-            if (_secondaryColorButton != null) _secondaryColorButton.clicked += () => SelectMaterial(secondaryMaterial);
-            _redSlider?.RegisterValueChangedCallback(_ => OnColorChanged());
-            _greenSlider?.RegisterValueChangedCallback(_ => OnColorChanged());
-            _blueSlider?.RegisterValueChangedCallback(_ => OnColorChanged());
+            _textureGrid = _root.Q("texture-grid");
+            _textureHint = _root.Q<Label>("texture-hint");
         }
 
         void BindVariantControls()
@@ -376,9 +380,10 @@ namespace ArKitchen.UI
                     pair.Value.EnableInClassList("is-visible", pair.Key == mode);
 
             UpdateHeader(mode);
+            if (mode != VoxelEditMode.Color && _textureTarget != null) DeselectTexture();
             if (mode == VoxelEditMode.Scale) SyncFromController();
             if (mode == VoxelEditMode.FillKitchen) UpdateFillState();
-            if (mode == VoxelEditMode.Color) SelectMaterial(_activeMaterial != null ? _activeMaterial : mainMaterial);
+            if (mode == VoxelEditMode.Color) EnterTextureMode();
             UpdateRotationReadout();
         }
 
@@ -394,9 +399,9 @@ namespace ArKitchen.UI
                 case VoxelEditMode.Rotation:
                     title = "Rotate"; hint = "Align with your wall"; icon = "R"; break;
                 case VoxelEditMode.FillKitchen:
-                    title = "Fill"; hint = "Tap to add kitchen units"; icon = "F"; break;
+                    title = "Add units"; hint = "Choose a type, then pick a size"; icon = "+"; break;
                 case VoxelEditMode.Color:
-                    title = "Color"; hint = "Pick a cabinet finish"; icon = "C"; break;
+                    title = "Texture"; hint = "Tap an element, pick a finish"; icon = "T"; break;
                 default:
                     title = "Scale"; hint = "Set the kitchen footprint"; icon = "S"; break;
             }
@@ -405,15 +410,7 @@ namespace ArKitchen.UI
             if (_headerHint != null) _headerHint.text = hint;
             if (_headerIcon != null) _headerIcon.text = icon;
             if (_headerRight != null)
-            {
                 _headerRight.Clear();
-                if (mode == VoxelEditMode.FillKitchen && _freeLabel != null)
-                {
-                    var label = new Label(_freeLabel.text);
-                    label.AddToClassList("free-label");
-                    _headerRight.Add(label);
-                }
-            }
         }
 
         void Show()
@@ -507,9 +504,9 @@ namespace ArKitchen.UI
             if (row == null) return;
             row.Clear();
             _categoryButtons.Clear();
-            AddCategory(row, KitchenElementGroup.Storage, "Fridge");
-            AddCategory(row, KitchenElementGroup.Washing, "Sink");
-            AddCategory(row, KitchenElementGroup.Cooking, "Stove");
+            AddCategory(row, KitchenElementGroup.Storage, "Fridges");
+            AddCategory(row, KitchenElementGroup.Washing, "Sinks");
+            AddCategory(row, KitchenElementGroup.Cooking, "Stoves");
             UpdateCategoryClasses();
         }
 
@@ -538,22 +535,52 @@ namespace ArKitchen.UI
             _catalogGrid.Clear();
             _catalogButtons.Clear();
             _catalogDefinitions.Clear();
+            _catalogActionLabels.Clear();
             if (definitions == null) return;
 
             foreach (var def in definitions)
             {
                 if (def == null || def.IsFiller || def.Group != _activeGroup) continue;
                 var captured = def;
-                var button = new Button(() => AddDefinition(captured))
-                {
-                    text = FormatCatalogLabel(captured)
-                };
-                button.AddToClassList("catalog-button");
+                var button = CreateCatalogButton(captured);
                 _catalogGrid.Add(button);
                 _catalogButtons.Add(button);
                 _catalogDefinitions[button] = captured;
             }
             UpdateFillState();
+        }
+
+        Button CreateCatalogButton(KitchenElementDefinition def)
+        {
+            var button = new Button(() => AddDefinition(def));
+            button.AddToClassList("catalog-button");
+
+            string title = string.IsNullOrEmpty(def.Code) ? def.DisplayName : $"{def.Code} {def.DisplayName}";
+            string price = def.BasePrice > 0f ? $"{def.BasePrice:N0} €" : "Included";
+            int widthCm = Mathf.RoundToInt(def.WidthMeters * 100f);
+
+            var top = new VisualElement();
+            top.AddToClassList("catalog-card-top");
+            var titleLabel = new Label(title);
+            titleLabel.AddToClassList("catalog-card-title");
+            var priceLabel = new Label(price);
+            priceLabel.AddToClassList("catalog-card-price");
+            top.Add(titleLabel);
+            top.Add(priceLabel);
+
+            var sizeLabel = new Label($"{widthCm} cm wide");
+            sizeLabel.AddToClassList("catalog-card-size");
+            var actionLabel = new Label("Tap to add");
+            actionLabel.AddToClassList("catalog-card-action");
+            var bottom = new VisualElement();
+            bottom.AddToClassList("catalog-card-bottom");
+            bottom.Add(sizeLabel);
+            bottom.Add(actionLabel);
+
+            button.Add(top);
+            button.Add(bottom);
+            _catalogActionLabels[button] = actionLabel;
+            return button;
         }
 
         void AddDefinition(KitchenElementDefinition def)
@@ -582,17 +609,31 @@ namespace ArKitchen.UI
             if (_layout == null) BindLayout();
             float remaining = _layout != null ? _layout.RemainingLength : 0f;
             if (_freeLabel != null) _freeLabel.text = $"{remaining:0.0} m free";
-            if (stateManager != null && stateManager.CurrentMode == VoxelEditMode.FillKitchen)
-                UpdateHeader(VoxelEditMode.FillKitchen);
-            if (_removeLastButton != null)
-                _removeLastButton.SetEnabled(_layout != null && _layout.Placed.Count > 0);
+            if (_addWorktopButton != null)
+            {
+                if (_layout == null || !_layout.CanAddFiller) _choosingWorktopSlot = false;
+                _addWorktopButton.style.display = _layout != null && _layout.CanAddFiller
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
+                _addWorktopButton.text = _choosingWorktopSlot ? "Cancel" : "+ Worktop";
+                _addWorktopButton.EnableInClassList("is-selecting", _choosingWorktopSlot);
+            }
 
             UpdateMandatory();
             UpdatePlacedStrip();
             foreach (var button in _catalogButtons)
             {
                 _catalogDefinitions.TryGetValue(button, out var def);
-                button.SetEnabled(_layout != null && def != null && _layout.LengthFits(def));
+                bool depthFits = _layout != null && def != null && _layout.DepthFits(def);
+                bool lengthFits = _layout != null && def != null && _layout.LengthFits(def);
+                bool fits = depthFits && lengthFits;
+                button.SetEnabled(fits);
+                if (_catalogActionLabels.TryGetValue(button, out var action))
+                    action.text = fits
+                        ? "Tap to add"
+                        : !depthFits
+                            ? $"Needs {def.DepthMeters:0.0} m depth"
+                            : $"Needs {def.WidthMeters:0.0} m free";
             }
         }
 
@@ -642,8 +683,9 @@ namespace ArKitchen.UI
             bool hasFiller = _layout.HasFiller;
             bool canAddFiller = _layout.CanAddFiller;
 
-            // Strip stays visible while there are units, a desk, or a slot to drop one.
-            bool visible = units > 0 || hasFiller || canAddFiller;
+            // Keep an empty layout out of the way. Its single worktop action lives
+            // in the compact toolbar; the strip appears once there is real content.
+            bool visible = units > 0 || hasFiller;
             _placedStrip.EnableInClassList("is-visible", visible);
             if (!visible) return;
 
@@ -653,7 +695,7 @@ namespace ArKitchen.UI
             {
                 if (hasFiller && _layout.FillerSlot == i)
                     AddFillerChip();
-                else if (!hasFiller && canAddFiller)
+                else if (!hasFiller && canAddFiller && _choosingWorktopSlot)
                     AddInsertMarker(i);
 
                 if (i == units) break;
@@ -668,9 +710,23 @@ namespace ArKitchen.UI
         {
             var captured = view;
             float placedPrice = view.Definition.GetVariantPrice(view.CurrentVariantIndex);
-            string placedLabel = $"{GroupLabel(view.Definition.Group)} {view.Definition.DisplayName}";
-            if (placedPrice > 0f) placedLabel += $"\n{placedPrice:N0} €";
-            var button = new Button(() => OpenVariantSheet(captured)) { text = placedLabel };
+            int widthCm = Mathf.RoundToInt(view.Definition.WidthMeters * 100f);
+            string placedLabel = string.IsNullOrEmpty(view.Definition.Code)
+                ? view.Definition.DisplayName
+                : $"{view.Definition.Code} {view.Definition.DisplayName}";
+            placedLabel += "  ×";
+            placedLabel += placedPrice > 0f
+                ? $"\n{widthCm} cm  ·  {placedPrice:N0} €"
+                : $"\n{widthCm} cm";
+            var button = new Button(() =>
+            {
+                if (_layout != null && _layout.Remove(captured))
+                    ShowToast($"{captured.Definition.DisplayName} removed");
+            })
+            {
+                text = placedLabel,
+                tooltip = "Tap to remove"
+            };
             button.AddToClassList("placed-button");
             _placedStrip.contentContainer.Add(button);
             _placedButtons.Add(button);
@@ -681,37 +737,27 @@ namespace ArKitchen.UI
             int captured = slot;
             var button = new Button(() =>
             {
+                _choosingWorktopSlot = false;
                 _layout?.AddFillerAt(captured);
                 ShowToast("Working desk added");
             })
-            { text = "+" };
+            { text = "Place here" };
             button.AddToClassList("insert-marker");
             _placedStrip.contentContainer.Add(button);
         }
 
         void AddFillerChip()
         {
-            int widthCm = Mathf.RoundToInt(_layout.RemainingLength * 100f);
+            int widthCm = Mathf.RoundToInt(_layout.FillerWidth * 100f);
             var button = new Button(() =>
             {
                 _layout?.RemoveFiller();
                 ShowToast("Working desk removed");
             })
-            { text = $"Desk\n{widthCm} cm" };
+            { text = $"Worktop\n{widthCm} cm  ·  tap to remove" };
             button.AddToClassList("placed-button");
             button.AddToClassList("filler-chip");
             _placedStrip.contentContainer.Add(button);
-        }
-
-        static string FormatCatalogLabel(KitchenElementDefinition def)
-        {
-            int w = Mathf.RoundToInt(def.WidthMeters * 100f);
-            int h = Mathf.RoundToInt(def.HeightMeters * 100f);
-            int d = Mathf.RoundToInt(def.DepthMeters * 100f);
-            string title = string.IsNullOrEmpty(def.Code) ? def.DisplayName : $"{def.Code} {def.DisplayName}";
-            string dims = $"{w}x{h}x{d} cm";
-            float price = def.BasePrice;
-            return price > 0f ? $"{title}\n{dims}\n{price:N0} €" : $"{title}\n{dims}";
         }
 
         static string GroupLabel(KitchenElementGroup group) =>
@@ -722,55 +768,72 @@ namespace ArKitchen.UI
                 _ => "Fridge"
             };
 
-        void SelectMaterial(Material mat)
+        // Entering Texture mode: clear any prior selection and prompt the user to
+        // tap an element. The grid is populated per-element once one is tapped.
+        void EnterTextureMode() => DeselectTexture();
+
+        void DeselectTexture()
         {
-            if (mat == null) return;
-            _activeMaterial = mat;
-            _mainColorButton?.EnableInClassList("is-selected", mat == mainMaterial);
-            _secondaryColorButton?.EnableInClassList("is-selected", mat == secondaryMaterial);
-            SyncColorFromMaterial();
+            if (_textureTarget != null) _textureTarget.SetSelected(false);
+            _textureTarget = null;
+            _textureButtons.Clear();
+            if (_textureGrid != null) _textureGrid.Clear();
+            if (_textureHint != null)
+            {
+                _textureHint.text = "Tap an element to texture it";
+                _textureHint.style.display = DisplayStyle.Flex;
+            }
         }
 
-        void SyncColorFromMaterial()
+        // A tap in Texture mode picked this element: show the finishes its
+        // definition allows (different sets for an appliance vs the desk).
+        void SelectTextureTarget(KitchenElementView view)
         {
-            if (_activeMaterial == null || _redSlider == null || _greenSlider == null || _blueSlider == null) return;
-            Color c = GetColor(_activeMaterial);
-            _syncing = true;
-            _redSlider.value = c.r;
-            _greenSlider.value = c.g;
-            _blueSlider.value = c.b;
-            _syncing = false;
-            UpdateColorLabels(c);
+            if (view == null || view.Definition == null) return;
+            if (_textureTarget == view) return;
+            if (_textureTarget != null) _textureTarget.SetSelected(false);
+            _textureTarget = view;
+            _textureTarget.SetSelected(true);
+            BuildTextureGrid(view);
         }
 
-        void OnColorChanged()
+        void BuildTextureGrid(KitchenElementView view)
         {
-            if (_syncing || _activeMaterial == null || _redSlider == null || _greenSlider == null || _blueSlider == null)
-                return;
-            var c = new Color(_redSlider.value, _greenSlider.value, _blueSlider.value, 1f);
-            SetColor(_activeMaterial, c);
-            UpdateColorLabels(c);
+            if (_textureGrid == null) return;
+            _textureGrid.Clear();
+            _textureButtons.Clear();
+
+            var textures = view.Definition.CompatibleTextures;
+            int count = textures != null ? textures.Count : 0;
+
+            if (_textureHint != null)
+                _textureHint.text = count > 0
+                    ? $"{view.Definition.DisplayName} finish"
+                    : $"No finishes set for {view.Definition.DisplayName}";
+
+            for (int i = 0; i < count; i++)
+            {
+                var tex = textures[i];
+                if (tex == null) continue;
+                var capturedTex = tex;
+                var capturedView = view;
+                var button = new Button(() => ChooseTexture(capturedView, capturedTex));
+                button.AddToClassList("texture-swatch");
+                button.style.backgroundImage = new StyleBackground(tex);
+                button.EnableInClassList("is-selected", view.ChosenTexture == tex);
+                _textureGrid.Add(button);
+                _textureButtons.Add(button);
+            }
         }
 
-        static Color GetColor(Material material) =>
-            material.HasProperty(BaseColorId) ? material.GetColor(BaseColorId) : material.color;
-
-        static void SetColor(Material material, Color color)
+        // Takes the element explicitly (captured per swatch) so a finish always
+        // applies to the element it belongs to, independent of selection state.
+        void ChooseTexture(KitchenElementView view, Texture2D texture)
         {
-            if (material.HasProperty(BaseColorId)) material.SetColor(BaseColorId, color);
-            material.color = color;
-        }
-
-        void UpdateColorLabels(Color c)
-        {
-            int r = Mathf.RoundToInt(c.r * 255f);
-            int g = Mathf.RoundToInt(c.g * 255f);
-            int b = Mathf.RoundToInt(c.b * 255f);
-            if (_redValue != null) _redValue.text = r.ToString();
-            if (_greenValue != null) _greenValue.text = g.ToString();
-            if (_blueValue != null) _blueValue.text = b.ToString();
-            if (_hexLabel != null) _hexLabel.text = $"#{r:X2}{g:X2}{b:X2}";
-            if (_colorPreview != null) _colorPreview.style.backgroundColor = c;
+            if (view == null || texture == null) return;
+            view.ApplyTexture(texture);
+            if (_textureTarget == view) BuildTextureGrid(view); // refresh the selected-swatch highlight
+            ShowToast("Finish applied");
         }
 
         void OpenVariantSheet(KitchenElementView view)
@@ -778,7 +841,9 @@ namespace ArKitchen.UI
             if (view == null || view.Definition == null || view.Definition.VariantCount <= 1) return;
             _selectedVariantView = view;
             if (_variantTitle != null)
-                _variantTitle.text = $"{GroupLabel(view.Definition.Group)} - {view.Definition.DisplayName}";
+                _variantTitle.text = string.IsNullOrEmpty(view.Definition.Code)
+                    ? view.Definition.DisplayName
+                    : $"{view.Definition.Code} {view.Definition.DisplayName}";
             if (_variantList != null)
             {
                 _variantList.Clear();
@@ -826,37 +891,24 @@ namespace ArKitchen.UI
 
         bool IsPointerOverOwnUi(Vector2 screenPos)
         {
-            if (_root == null || _root.resolvedStyle.display == DisplayStyle.None) return false;
-            if (_contextPanel != null && ContainsScreenPoint(_contextPanel, screenPos)) return true;
+            if (_root == null || _root.panel == null || _root.resolvedStyle.display == DisplayStyle.None)
+                return false;
+            if (_variantOverlay != null && _variantOverlay.ClassListContains("is-visible"))
+                return true;
+
+            Vector2 panelPos = RuntimePanelUtils.ScreenToPanel(_root.panel, screenPos);
+
+            // Authoritative hit-test: walk up from the picked element to see if the
+            // tap landed inside the context panel or the bottom mode bar (this is
+            // what makes swatch/button taps not fall through to the world raycast).
+            for (var e = _root.panel.Pick(panelPos); e != null; e = e.parent)
+                if (e == _contextPanel || e.name == "mode-bar")
+                    return true;
+
+            // Bounds fallback in case something along the path isn't pickable.
+            if (_contextPanel != null && _contextPanel.worldBound.Contains(panelPos)) return true;
             var modeBar = _root.Q("mode-bar");
-            if (modeBar != null && ContainsScreenPoint(modeBar, screenPos)) return true;
-            if (_variantOverlay != null && _variantOverlay.ClassListContains("is-visible")) return true;
-            return false;
-        }
-
-        static bool ContainsScreenPoint(VisualElement element, Vector2 screenPos)
-        {
-            if (element == null || element.panel == null) return false;
-            Vector2 panelPos = RuntimePanelUtils.ScreenToPanel(element.panel, screenPos);
-            return element.worldBound.Contains(panelPos);
-        }
-
-        static bool TryGetTap(out Vector2 pos)
-        {
-            pos = default;
-            if (Touchscreen.current != null)
-            {
-                if (Touchscreen.current.primaryTouch.phase.ReadValue() != UnityEngine.InputSystem.TouchPhase.Began)
-                    return false;
-                pos = Touchscreen.current.primaryTouch.position.ReadValue();
-                return true;
-            }
-            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
-            {
-                pos = Mouse.current.position.ReadValue();
-                return true;
-            }
-            return false;
+            return modeBar != null && modeBar.worldBound.Contains(panelPos);
         }
 
         static KitchenElementView RaycastForElement(Ray ray)

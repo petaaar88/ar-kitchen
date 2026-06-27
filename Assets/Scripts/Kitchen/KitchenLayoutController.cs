@@ -33,7 +33,12 @@ public class KitchenLayoutController : MonoBehaviour
 
     public IReadOnlyList<KitchenElementView> Placed => _placed;
     public float UsedLength { get; private set; }
-    public float RemainingLength => Mathf.Max(0f, voxel.Depth - UsedLength);
+    // The worktop physically occupies the flexible remainder. Keep that raw
+    // span separately for sizing it, while RemainingLength reports genuinely
+    // unoccupied space to UI and add/fit checks.
+    public float FlexibleLength => Mathf.Max(0f, voxel.Depth - UsedLength);
+    public float RemainingLength => _filler == null ? FlexibleLength : 0f;
+    public float FillerWidth => _filler != null ? FlexibleLength : 0f;
 
     public bool HasFiller => _filler != null;
     public int FillerSlot => _fillerSlot;
@@ -90,9 +95,7 @@ public class KitchenLayoutController : MonoBehaviour
     public bool LengthFits(KitchenElementDefinition def)
     {
         if (def == null) return false;
-        // Reserve the filler's minimum so adding a unit shrinks but never erases it.
-        float available = RemainingLength - (_filler != null ? MinFillerWidth : 0f);
-        return def.WidthMeters <= available + Epsilon;
+        return def.WidthMeters <= RemainingLength + Epsilon;
     }
 
     public AddResult TryAdd(KitchenElementDefinition def)
@@ -112,9 +115,18 @@ public class KitchenLayoutController : MonoBehaviour
     public bool RemoveLast()
     {
         if (_placed.Count == 0) return false;
-        var last = _placed[^1];
-        _placed.RemoveAt(_placed.Count - 1);
-        if (last != null) Destroy(last.gameObject);
+        return Remove(_placed[^1]);
+    }
+
+    public bool Remove(KitchenElementView view)
+    {
+        if (view == null) return false;
+        int index = _placed.IndexOf(view);
+        if (index < 0) return false;
+
+        _placed.RemoveAt(index);
+        if (_filler != null && index < _fillerSlot) _fillerSlot--;
+        Destroy(view.gameObject);
         Reposition();
         OnLayoutChanged?.Invoke();
         return true;
@@ -163,10 +175,11 @@ public class KitchenLayoutController : MonoBehaviour
 
     void Reposition()
     {
-        // Wall = left edge of voxel (x = -hw). Elements line up along -Z from the
-        // back (+hd) toward the front. Rotation is +270° around Y so the labeled
-        // face points outward (room side). Pivot is offset by (d, 0, -w) per
-        // element so the body's world AABB stays snug against the -X wall.
+        // Wall = left edge of voxel (x = -hw). Elements line up along +Z starting
+        // from -hd, so the placed-strip's left-to-right order (slot 0 first) matches
+        // the room's left-to-right - tapping a left worktop slot places it on the
+        // left. Rotation is +270° around Y so the labeled face points outward (room
+        // side). Pivot is offset by (d, 0, ...) per element to stay snug against -X.
         float hw = voxel.Width * 0.5f;
         float hd = voxel.Depth * 0.5f;
         var rot = Quaternion.Euler(0f, 270f, 0f);
@@ -193,7 +206,7 @@ public class KitchenLayoutController : MonoBehaviour
             if (_filler != null && _fillerSlot == i)
             {
                 _filler.SetFillerSize(fillerWidth);
-                _filler.transform.localPosition = new Vector3(-hw + fillerDefinition.DepthMeters - FillerBackInset, 0f, hd - used - fillerWidth);
+                _filler.transform.localPosition = new Vector3(-hw + fillerDefinition.DepthMeters - FillerBackInset, 0f, -hd + used);
                 _filler.transform.localRotation = rot;
                 used += fillerWidth;
             }
@@ -202,7 +215,7 @@ public class KitchenLayoutController : MonoBehaviour
             var view = _placed[i];
             if (view == null) continue;
             var def = view.Definition;
-            view.transform.localPosition = new Vector3(-hw + def.DepthMeters, 0f, hd - used - def.WidthMeters);
+            view.transform.localPosition = new Vector3(-hw + def.DepthMeters, 0f, -hd + used);
             view.transform.localRotation = rot;
             used += def.WidthMeters;
         }

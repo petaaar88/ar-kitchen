@@ -192,53 +192,97 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.55);
+    background-color: rgba(4, 6, 10, 0.66);
 }
 
 .congrats-card {
-    background-color: rgba(10, 12, 15, 0.97);
-    border-radius: 28px;
+    background-color: rgba(14, 17, 23, 0.98);
+    border-radius: 34px;
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.14);
-    padding-top: 52px;
-    padding-bottom: 48px;
-    padding-left: 52px;
-    padding-right: 52px;
+    border-color: rgba(255, 255, 255, 0.12);
+    padding-top: 54px;
+    padding-bottom: 46px;
+    padding-left: 48px;
+    padding-right: 48px;
     align-items: center;
-    width: 78%;
+    width: 82%;
+    max-width: 840px;
+}
+
+.congrats-badge-wrap {
+    width: 134px;
+    height: 134px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.congrats-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 134px;
+    height: 134px;
+    border-radius: 67px;
+    border-width: 5px;
+    border-color: rgba(46, 204, 113, 0.55);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.congrats-badge {
+    width: 134px;
+    height: 134px;
+    border-radius: 67px;
+    background-color: rgb(46, 204, 113);
+    border-width: 3px;
+    border-color: rgba(255, 255, 255, 0.22);
+    align-items: center;
+    justify-content: center;
+}
+
+.congrats-check {
+    font-size: 82px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+.confetti-piece {
+    position: absolute;
+    border-radius: 2px;
 }
 
 .congrats-title {
-    font-size: 52px;
+    font-size: 58px;
     -unity-font-style: bold;
-    color: rgb(245, 248, 255);
+    color: rgb(247, 250, 255);
     -unity-text-align: middle-center;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 
 .congrats-body {
     font-size: 30px;
-    color: rgba(255, 255, 255, 0.70);
+    color: rgba(255, 255, 255, 0.72);
     -unity-text-align: middle-center;
     white-space: normal;
-    margin-bottom: 48px;
+    margin-bottom: 44px;
 }
 
 .congrats-close {
-    width: 300px;
-    height: 80px;
-    border-radius: 20px;
+    width: 320px;
+    height: 84px;
+    border-radius: 22px;
     border-width: 0;
-    background-color: rgb(52, 199, 89);
+    background-color: rgb(46, 204, 113);
     color: rgb(255, 255, 255);
     font-size: 36px;
     -unity-font-style: bold;
 }
 
 .congrats-close:hover {
-    background-color: rgb(72, 219, 109);
+    background-color: rgb(64, 220, 130);
 }
 
 .congrats-close:active {
-    background-color: rgb(40, 167, 70);
+    background-color: rgb(38, 174, 96);
 }
