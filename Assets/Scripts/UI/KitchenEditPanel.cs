@@ -62,8 +62,11 @@ namespace ArKitchen.UI
         VisualElement _catalogGrid;
         VisualElement _textureGrid;
         Label _textureHint;
+        VisualElement _colorRow;
+        Label _colorHint;
         KitchenElementView _textureTarget;
         readonly List<Button> _textureButtons = new();
+        readonly List<Button> _colorButtons = new();
 
         KitchenLayoutController _layout;
         KitchenElementGroup _activeGroup = KitchenElementGroup.Storage;
@@ -332,6 +335,8 @@ namespace ArKitchen.UI
         {
             _textureGrid = _root.Q("texture-grid");
             _textureHint = _root.Q<Label>("texture-hint");
+            _colorRow = _root.Q("color-row");
+            _colorHint = _root.Q<Label>("color-hint");
         }
 
         void BindVariantControls()
@@ -401,7 +406,7 @@ namespace ArKitchen.UI
                 case VoxelEditMode.FillKitchen:
                     title = "Add units"; hint = "Choose a type, then pick a size"; icon = "+"; break;
                 case VoxelEditMode.Color:
-                    title = "Texture"; hint = "Tap an element, pick a finish"; icon = "T"; break;
+                    title = "Texture"; hint = "Tap an element, pick a finish or colour"; icon = "T"; break;
                 default:
                     title = "Scale"; hint = "Set the kitchen footprint"; icon = "S"; break;
             }
@@ -778,6 +783,9 @@ namespace ArKitchen.UI
             _textureTarget = null;
             _textureButtons.Clear();
             if (_textureGrid != null) _textureGrid.Clear();
+            _colorButtons.Clear();
+            if (_colorRow != null) _colorRow.Clear();
+            if (_colorHint != null) _colorHint.style.display = DisplayStyle.None;
             if (_textureHint != null)
             {
                 _textureHint.text = "Tap an element to texture it";
@@ -795,6 +803,7 @@ namespace ArKitchen.UI
             _textureTarget = view;
             _textureTarget.SetSelected(true);
             BuildTextureGrid(view);
+            BuildColorRow(view);
         }
 
         void BuildTextureGrid(KitchenElementView view)
@@ -834,6 +843,50 @@ namespace ArKitchen.UI
             view.ApplyTexture(texture);
             if (_textureTarget == view) BuildTextureGrid(view); // refresh the selected-swatch highlight
             ShowToast("Finish applied");
+        }
+
+        // Secondary-colour swatches shown beneath the textures: they tint the
+        // element's secondary surfaces (trims/accents), independent of the body
+        // texture. Hidden for elements that have no secondary surface to colour.
+        void BuildColorRow(KitchenElementView view)
+        {
+            if (_colorRow == null) return;
+            _colorRow.Clear();
+            _colorButtons.Clear();
+
+            bool hasSecondary = view.HasSecondarySurface;
+            if (_colorHint != null) _colorHint.style.display = hasSecondary ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!hasSecondary) return;
+
+            foreach (var option in KitchenElementView.ColorPalette)
+            {
+                var capturedOption = option;
+                var capturedView = view;
+                var chip = new Button(() => ChooseColor(capturedView, capturedOption));
+                chip.AddToClassList("color-chip");
+
+                var dot = new VisualElement();
+                dot.AddToClassList("color-dot");
+                dot.style.backgroundColor = option.Color;
+                bool selected = view.ChosenColor.HasValue && view.ChosenColor.Value.Name == option.Name;
+                dot.EnableInClassList("is-selected", selected);
+
+                var name = new Label(option.Name);
+                name.AddToClassList("color-name");
+
+                chip.Add(dot);
+                chip.Add(name);
+                _colorRow.Add(chip);
+                _colorButtons.Add(chip);
+            }
+        }
+
+        void ChooseColor(KitchenElementView view, KitchenElementView.ColorOption option)
+        {
+            if (view == null) return;
+            view.ApplyColor(option);
+            if (_textureTarget == view) BuildColorRow(view); // refresh the chosen-swatch highlight
+            ShowToast($"{option.Name} colour applied");
         }
 
         void OpenVariantSheet(KitchenElementView view)

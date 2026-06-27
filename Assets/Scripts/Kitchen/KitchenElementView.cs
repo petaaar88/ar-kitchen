@@ -24,7 +24,42 @@ public class KitchenElementView : MonoBehaviour
     static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
     static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     static readonly int TextureScaleId = Shader.PropertyToID("_TextureScale");
+    static readonly int MetallicId = Shader.PropertyToID("_Metallic");
+    static readonly int SmoothnessId = Shader.PropertyToID("_Smoothness");
+
+    // A solid colour applied to an element's secondary surfaces, independent of the
+    // body texture. Metallic entries (gold, silver) also drive _Metallic/_Smoothness,
+    // otherwise they'd read as flat mustard/grey rather than metal.
+    public readonly struct ColorOption
+    {
+        public readonly string Name;
+        public readonly Color Color;
+        public readonly bool Metallic;
+        public ColorOption(string name, Color color, bool metallic)
+        {
+            Name = name;
+            Color = color;
+            Metallic = metallic;
+        }
+    }
+
+    // Shared palette shown in the Texture picker's colour row.
+    public static readonly ColorOption[] ColorPalette =
+    {
+        new ColorOption("Black",  new Color(0.05f, 0.05f, 0.06f), false),
+        new ColorOption("Gold",   new Color(1.00f, 0.78f, 0.34f), true),
+        new ColorOption("White",  new Color(0.95f, 0.95f, 0.95f), false),
+        new ColorOption("Silver", new Color(0.90f, 0.90f, 0.92f), true),
+    };
+
+    // The shared secondary material (handles/trims/accents) the colour picker tints;
+    // matched by name so the body texture and white worktops are left alone.
+    const string SecondaryMaterialName = "KitchenSecondaryMaterial";
+    const float MetalSmoothness = 0.85f;
+    const float MatteSmoothness = 0.30f;
+
     Texture _chosenTexture;
+    ColorOption? _chosenColor;
 
     GameObject _highlight;
     static Material _highlightMaterial;
@@ -33,6 +68,7 @@ public class KitchenElementView : MonoBehaviour
     public int CurrentVariantIndex => _variantIndex;
     public bool IsFiller { get; private set; }
     public Texture ChosenTexture => _chosenTexture;
+    public ColorOption? ChosenColor => _chosenColor;
 
     public void Apply(KitchenElementDefinition def)
     {
@@ -75,7 +111,7 @@ public class KitchenElementView : MonoBehaviour
         if (_fillerCollider == null) _fillerCollider = gameObject.AddComponent<BoxCollider>();
 
         SetFillerSize(def.DepthMeters);
-        ReapplyTexture();
+        ReapplyFinish();
     }
 
     Transform CreateFillerPart(string partName, Material material)
@@ -124,22 +160,48 @@ public class KitchenElementView : MonoBehaviour
         }
     }
 
-    // Per-instance finish: sets _BaseMap on this view's primary surfaces. "Primary"
-    // = whatever uses the triplanar shader (it alone exposes _TextureScale) -
-    // KitchenMainMaterial on FBX units and the desk body; secondary/detail surfaces
-    // (plain Lit, no _TextureScale) are left untouched. The material is instanced
-    // per renderer so each placed unit keeps its own finish.
+    // Texture finish: drives the primary body surfaces. "Primary" = whatever uses the
+    // triplanar shader (it alone exposes _TextureScale) - KitchenMainMaterial on FBX
+    // units and the desk body. Secondary/detail surfaces carry the colour finish
+    // instead (see ApplyColor). The material is instanced per renderer so each placed
+    // unit keeps its own finish.
     public void ApplyTexture(Texture texture)
     {
         _chosenTexture = texture;
-        ReapplyTexture();
+        ReapplyFinish();
     }
 
-    // Re-pushes the chosen finish onto the current renderers. Called after the
-    // model is (re)built - a variant swap or filler rebuild replaces the meshes.
-    void ReapplyTexture()
+    // Secondary colour finish: tints the shared secondary material (handles, trims,
+    // accents) per instance, independent of the body texture. A white _BaseMap keeps
+    // the colour flat; metallic swatches (gold, silver) drive _Metallic/_Smoothness
+    // so they read as metal rather than mustard/grey.
+    public void ApplyColor(ColorOption option)
     {
-        if (_chosenTexture == null) return;
+        _chosenColor = option;
+        ReapplyFinish();
+    }
+
+    // True when the model has a secondary surface a colour can tint (most appliances
+    // do; the imported C1 cooktop and the procedural desk don't).
+    public bool HasSecondarySurface
+    {
+        get
+        {
+            foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>(true))
+                foreach (var shared in meshRenderer.sharedMaterials)
+                    if (shared != null && shared.name.StartsWith(SecondaryMaterialName))
+                        return true;
+            return false;
+        }
+    }
+
+    // Re-pushes the chosen finishes onto the current renderers: the texture onto the
+    // primary body, the colour onto the secondary surfaces - each independent. Called
+    // after the model is (re)built, since a variant swap or filler rebuild replaces
+    // the meshes.
+    void ReapplyFinish()
+    {
+        if (_chosenTexture == null && !_chosenColor.HasValue) return;
 
         var renderers = GetComponentsInChildren<MeshRenderer>(true);
         bool modelHasPrimary = false;
@@ -162,18 +224,39 @@ public class KitchenElementView : MonoBehaviour
             foreach (var instance in meshRenderer.materials)
             {
                 if (instance == null) continue;
-                bool isPrimary = instance.HasProperty(TextureScaleId);
-                // C1 is an imported single-finish cooktop without a prefab material
-                // remap. If a model has no triplanar surface at all, still allow its
-                // ordinary URP BaseMap to receive the chosen finish.
-                if (isPrimary || (!modelHasPrimary && instance.HasProperty(BaseMapId)))
+
+                // C1 is an imported single-finish cooktop without a triplanar surface;
+                // treat its ordinary BaseMap surface as primary so it still textures.
+                bool isPrimary = instance.HasProperty(TextureScaleId)
+                    || (!modelHasPrimary && instance.HasProperty(BaseMapId));
+
+                if (isPrimary)
                 {
-                    instance.SetTexture(BaseMapId, _chosenTexture);
-                    if (instance.HasProperty(BaseColorId))
-                        instance.SetColor(BaseColorId, Color.white);
+                    if (_chosenTexture != null) ApplyTextureTo(instance);
+                }
+                else if (_chosenColor.HasValue && instance.name.StartsWith(SecondaryMaterialName))
+                {
+                    ApplyColorTo(instance, _chosenColor.Value);
                 }
             }
         }
+    }
+
+    void ApplyTextureTo(Material instance)
+    {
+        instance.SetTexture(BaseMapId, _chosenTexture);
+        if (instance.HasProperty(BaseColorId)) instance.SetColor(BaseColorId, Color.white);
+    }
+
+    // Always sets metal/smoothness explicitly so a matte pick after a metallic one
+    // (or vice versa) never leaves stale shininess.
+    static void ApplyColorTo(Material instance, ColorOption option)
+    {
+        if (instance.HasProperty(BaseMapId)) instance.SetTexture(BaseMapId, Texture2D.whiteTexture);
+        if (instance.HasProperty(BaseColorId)) instance.SetColor(BaseColorId, option.Color);
+        if (instance.HasProperty(MetallicId)) instance.SetFloat(MetallicId, option.Metallic ? 1f : 0f);
+        if (instance.HasProperty(SmoothnessId))
+            instance.SetFloat(SmoothnessId, option.Metallic ? MetalSmoothness : MatteSmoothness);
     }
 
     // Selection halo for Texture mode: a translucent box wrapping the element's
@@ -276,7 +359,7 @@ public class KitchenElementView : MonoBehaviour
             box.center = box.size * 0.5f;
         }
 
-        ReapplyTexture();
+        ReapplyFinish();
     }
 
     // Combined render bounds of the model expressed in this view's local space,

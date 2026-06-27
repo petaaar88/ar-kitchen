@@ -503,6 +503,47 @@
     border-width: 4px;
 }
 
+.color-hint {
+    margin-top: 4px;
+    display: none;
+}
+
+.color-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.color-chip {
+    width: 23%;
+    align-items: center;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.color-dot {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.color-dot.is-selected {
+    border-color: rgb(40, 230, 70);
+    border-width: 4px;
+}
+
+.color-name {
+    margin-top: 8px;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.85);
+    -unity-text-align: middle-center;
+}
+
 .segment-button {
     flex-grow: 1;
     height: 56px;

@@ -96,6 +96,8 @@
                 <ui:Label name="texture-hint" text="Tap an element to texture it" class="texture-hint" />
                 <ui:ScrollView name="texture-scroll" class="catalog-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic">
                     <ui:VisualElement name="texture-grid" class="catalog-grid" />
+                    <ui:Label name="color-hint" text="Secondary colour" class="texture-hint color-hint" />
+                    <ui:VisualElement name="color-row" class="color-row" />
                 </ui:ScrollView>
             </ui:VisualElement>
         </ui:VisualElement>
